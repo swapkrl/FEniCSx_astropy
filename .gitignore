@@ -1,15 +1,9 @@
 conda_env/
-env/
-books/
-
-*.png
-*.jpg
-*.jpeg
-*.gif
 
 __pycache__/
 *.py[cod]
 *$py.class
+
 *.so
 
 .Python
@@ -31,13 +25,17 @@ wheels/
 
 .pytest_cache/
 .coverage
-.coverage.*
-htmlcov/
+.hypothesis/
+
+*.log
 
 .env
 .venv
+env/
 venv/
 ENV/
+env.bak/
+venv.bak/
 
 .vscode/
 .idea/
