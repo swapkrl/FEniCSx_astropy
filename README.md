@@ -346,22 +346,22 @@ This is an active research and educational project. Contributions are welcome in
 ## Roadmap
 
 **Short Term**
-- ✅ Black hole gravitational potential (3D)
-- ⬜ Newtonian gravity with multiple masses
-- ⬜ Geodesic path computation and visualization
-- ⬜ Gravitational lensing ray tracing
+-  Black hole gravitational potential (3D)
+-  Newtonian gravity with multiple masses
+-  Geodesic path computation and visualization
+-  Gravitational lensing ray tracing
 
 **Medium Term**
-- ⬜ Schwarzschild metric full 4D implementation
-- ⬜ Proper time and coordinate time fields
-- ⬜ Kerr metric for rotating black holes
-- ⬜ Tidal tensor visualization
+-  Schwarzschild metric full 4D implementation
+-  Proper time and coordinate time fields
+-  Kerr metric for rotating black holes
+-  Tidal tensor visualization
 
 **Long Term**
-- ⬜ Time-evolving gravitational wave simulation
-- ⬜ Binary black hole merger
-- ⬜ Cosmological spacetime expansion
-- ⬜ Numerical relativity integration (3+1 formalism)
+-  Time-evolving gravitational wave simulation
+-  Binary black hole merger
+-  Cosmological spacetime expansion
+-  Numerical relativity integration (3+1 formalism)
 
 ## Acknowledgments
 
