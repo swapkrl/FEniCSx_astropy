@@ -392,10 +392,6 @@ This project builds upon powerful scientific computing tools:
 - PETSc Documentation: https://petsc.org/
 - ParaView User Guide: https://www.paraview.org/
 
-## License
-
-MIT License - Feel free to use, modify, and extend for research, education, or personal projects.
-
 ## Contact & Citation
 
 If you use this code in your research or educational materials, please cite this repository and acknowledge the underlying software packages (FEniCSx, Astropy, PETSc).
