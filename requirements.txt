@@ -1,0 +1,9 @@
+numpy
+matplotlib
+scipy
+astropy==7.1.1
+astropy-iers-data==0.2025.10.13.0.37.17
+cffi==1.16.0
+cryptography==45.0.7
+mpi4py
+petsc4py

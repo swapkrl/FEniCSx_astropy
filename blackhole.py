@@ -1,18 +1,18 @@
-import os
-os.environ['FI_PROVIDER'] = 'tcp'
-os.environ['MPICH_ASYNC_PROGRESS'] = '1'
-
 import numpy as np
 
 DOLFINX_AVAILABLE = False
 comm = None
 
 try:
-    from dolfinx import mesh
-    import dolfinx.cpp as cpp
-    comm = cpp.MPI.COMM_SELF
+    from dolfinx import mesh, fem, default_scalar_type
+    from dolfinx.fem.petsc import LinearProblem
+    from dolfinx.io import VTXWriter
+    from mpi4py import MPI
+    import ufl
+    from petsc4py import PETSc
+    comm = MPI.COMM_WORLD
     DOLFINX_AVAILABLE = True
-    print("FEniCSx loaded successfully in serial mode")
+    print("FEniCSx loaded successfully")
 except Exception as e:
     print(f"Warning: FEniCSx not available: {e}")
     print("Continuing without FEM features...")
@@ -40,8 +40,9 @@ def create_astronomical_blackhole_geometry(blackhole_name="Sgr A*"):
         distance = 8.2 * u.kpc
         coordinates = SkyCoord('17h45m40.0409s', '-29d00m28.118s', frame='icrs')
         
-        rs = 2 * const.G * mass / (const.c**2)
-        domain_size = 100 * rs.to(u.m).value
+        mass_kg = mass.to(u.kg)
+        rs = (2 * const.G * mass_kg / (const.c**2)).to(u.m)
+        domain_size = 100 * rs.value
         
         print(f"Creating geometry for {blackhole_name}")
         print(f"Mass: {mass}")
@@ -52,7 +53,7 @@ def create_astronomical_blackhole_geometry(blackhole_name="Sgr A*"):
             'mass': mass,
             'distance': distance,
             'coordinates': coordinates,
-            'schwarzschild_radius': rs.to(u.m).value,
+            'schwarzschild_radius': rs.value,
             'domain_size': domain_size
         }
 
@@ -65,13 +66,67 @@ if DOLFINX_AVAILABLE and comm is not None:
         comm,
         [[-domain_size, -domain_size, -domain_size], 
          [domain_size, domain_size, domain_size]],
-        [10, 10, 10],
+        [20, 20, 20],
         cell_type=mesh.CellType.hexahedron
     )
     
     num_cells = domain.topology.index_map(domain.topology.dim).size_local
-    print(f"Astronomical mesh has {num_cells} cells")
+    print(f"Created mesh with {num_cells} cells")
     print(f"Schwarzschild radius: {rs:.2e} m")
+    
+    V = fem.functionspace(domain, ("Lagrange", 1))
+    
+    def schwarzschild_potential(x):
+        r = np.sqrt(x[0]**2 + x[1]**2 + x[2]**2)
+        r = np.maximum(r, rs * 0.1)
+        return -rs / (2 * r)
+    
+    def boundary(x):
+        boundary_size = domain_size * 0.99
+        return np.logical_or(
+            np.logical_or(
+                np.abs(x[0]) > boundary_size,
+                np.abs(x[1]) > boundary_size
+            ),
+            np.abs(x[2]) > boundary_size
+        )
+    
+    boundary_dofs = fem.locate_dofs_geometrical(V, boundary)
+    bc_func = fem.Function(V)
+    bc_func.interpolate(schwarzschild_potential)
+    bc = fem.dirichletbc(bc_func, boundary_dofs)
+    
+    u = ufl.TrialFunction(V)
+    v = ufl.TestFunction(V)
+    
+    f = fem.Function(V)
+    x = ufl.SpatialCoordinate(domain)
+    r_expr = ufl.sqrt(x[0]**2 + x[1]**2 + x[2]**2)
+    
+    a = ufl.dot(ufl.grad(u), ufl.grad(v)) * ufl.dx
+    L = f * v * ufl.dx
+    
+    problem = LinearProblem(a, L, bcs=[bc], 
+                           petsc_options={"ksp_type": "preonly", "pc_type": "lu"})
+    
+    print("Solving gravitational potential field...")
+    uh = problem.solve()
+    
+    print(f"Black hole simulation complete!")
+    print(f"Potential field degrees of freedom: {V.dofmap.index_map.size_global}")
+    
+    potential_norm = np.sqrt(comm.allreduce(
+        fem.assemble_scalar(fem.form(ufl.inner(uh, uh) * ufl.dx)),
+        op=MPI.SUM
+    ))
+    print(f"Potential field L2 norm: {potential_norm:.2e}")
+    
+    output_filename = "blackhole_simulation.bp"
+    uh.name = "gravitational_potential"
+    with VTXWriter(comm, output_filename, [uh], engine="BP4") as vtx:
+        vtx.write(0.0)
+    print(f"Results saved to {output_filename} for ParaView visualization")
+    
 else:
     print("Cannot create mesh - FEniCSx not available")
     print(f"Schwarzschild radius: {rs:.2e} m")
