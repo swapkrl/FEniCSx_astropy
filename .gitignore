@@ -47,3 +47,4 @@ Thumbs.db
 
 # Git files
 README_GIT_LFS.md
+.gitignore
