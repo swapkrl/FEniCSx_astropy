@@ -1,3 +1,11 @@
-outputs/data/vtx/gravitational_field_scalar_fields.bp/data.0 filter=lfs diff=lfs merge=lfs -text
+# Track all files larger than 99MB with Git LFS
+# Note: Git LFS doesn't have a built-in size filter, so we track specific large files
+# Specific file types that might be large
+*.bp filter=lfs diff=lfs merge=lfs -text
+*.h5 filter=lfs diff=lfs merge=lfs -text
+*.xdmf filter=lfs diff=lfs merge=lfs -text
+outputs/data/vtx/** filter=lfs diff=lfs merge=lfs -text
+outputs/data/xdmf/** filter=lfs diff=lfs merge=lfs -text
 outputs/data/vtx/gravitational_field_potential.bp/data.0 filter=lfs diff=lfs merge=lfs -text
+outputs/data/vtx/gravitational_field_scalar_fields.bp/data.0 filter=lfs diff=lfs merge=lfs -text
 outputs/data/vtx/gravitational_field_vector_field.bp/data.0 filter=lfs diff=lfs merge=lfs -text
