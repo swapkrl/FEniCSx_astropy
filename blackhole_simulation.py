@@ -1,14 +1,26 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+import os
 
 DOLFINX_AVAILABLE = False
 comm = None
 
+def ensure_dir(path):
+    os.makedirs(path, exist_ok=True)
+    return path
+
+OUTPUT_DIR = ensure_dir("outputs")
+DATA_DIR = ensure_dir(os.path.join(OUTPUT_DIR, "data"))
+VTX_DIR = ensure_dir(os.path.join(DATA_DIR, "vtx"))
+XDMF_DIR = ensure_dir(os.path.join(DATA_DIR, "xdmf"))
+PLOT_DIR = ensure_dir(os.path.join(OUTPUT_DIR, "visualizations", "plots"))
+PARAVIEW_DIR = ensure_dir(os.path.join(OUTPUT_DIR, "visualizations", "paraview"))
+
 try:
     from dolfinx import mesh, fem, default_scalar_type
     from dolfinx.fem.petsc import LinearProblem
-    from dolfinx.io import VTXWriter
+    from dolfinx.io import VTXWriter, XDMFFile
     from mpi4py import MPI
     import ufl
     from petsc4py import PETSc
@@ -25,7 +37,11 @@ class TimeEvolvingGravitationalField:
                  mesh_resolution=30,
                  schwarzschild_radius=2.0,
                  time_steps=50,
-                 dt=0.1):
+                 dt=0.1,
+                 output_basename="gravitational_field",
+                 output_format="both",
+                 write_interval=1,
+                 vtx_engine="BP4"):
         
         self.domain_size = domain_size
         self.mesh_resolution = mesh_resolution
@@ -33,6 +49,10 @@ class TimeEvolvingGravitationalField:
         self.time_steps = time_steps
         self.dt = dt
         self.current_time = 0.0
+        self.output_basename = output_basename
+        self.output_format = output_format
+        self.write_interval = max(1, int(write_interval))
+        self.vtx_engine = vtx_engine
         
     def create_mesh(self):
         L = self.domain_size
@@ -114,6 +134,36 @@ class TimeEvolvingGravitationalField:
         )
         return np.sqrt(energy)
     
+    def compute_derived_fields(self, domain, V, u):
+        grad_u = ufl.grad(u)
+        
+        V_vec = fem.functionspace(domain, ("DG", 0, (3,)))
+        field_strength = fem.Function(V_vec)
+        field_strength.name = "field_strength"
+        
+        field_expr = fem.Expression(-grad_u, V_vec.element.interpolation_points())
+        field_strength.interpolate(field_expr)
+        
+        V_scalar = fem.functionspace(domain, ("DG", 0))
+        magnitude = fem.Function(V_scalar)
+        magnitude.name = "field_magnitude"
+        
+        mag_expr = fem.Expression(ufl.sqrt(ufl.dot(grad_u, grad_u)), V_scalar.element.interpolation_points())
+        magnitude.interpolate(mag_expr)
+        
+        energy_density = fem.Function(V_scalar)
+        energy_density.name = "energy_density"
+        energy_expr = fem.Expression(0.5 * ufl.dot(grad_u, grad_u), V_scalar.element.interpolation_points())
+        energy_density.interpolate(energy_expr)
+        
+        curvature = fem.Function(V_scalar)
+        curvature.name = "curvature_scalar"
+        laplacian = ufl.div(grad_u)
+        curv_expr = fem.Expression(ufl.sqrt(laplacian**2 + 1e-10), V_scalar.element.interpolation_points())
+        curvature.interpolate(curv_expr)
+        
+        return field_strength, magnitude, energy_density, curvature
+    
     def simulate(self):
         print("=" * 70)
         print("TIME-EVOLVING GRAVITATIONAL FIELD SIMULATION")
@@ -135,33 +185,84 @@ class TimeEvolvingGravitationalField:
         u_n.interpolate(self.initial_potential)
         u_n.name = "gravitational_potential"
         
+        field_strength, magnitude, energy_density, curvature = self.compute_derived_fields(domain, V, u_n)
+        
         print("\nStarting time evolution...")
         
-        output_file = "time_evolution.bp"
+        write_vtx = self.output_format in ["vtx", "both"]
+        write_xdmf = self.output_format in ["xdmf", "both"]
+        
+        base_path = self.output_basename
+        vtx_potential_path = os.path.join(VTX_DIR, f"{base_path}_potential.bp")
+        vtx_scalar_path = os.path.join(VTX_DIR, f"{base_path}_scalar_fields.bp")
+        vtx_vector_path = os.path.join(VTX_DIR, f"{base_path}_vector_field.bp")
+        xdmf_path = os.path.join(XDMF_DIR, f"{base_path}.xdmf")
+        
         energies = []
         times = []
         
-        with VTXWriter(comm, output_file, [u_n], engine="BP4") as vtx:
-            vtx.write(0.0)
+        vtx_potential = None
+        vtx_scalar_fields = None
+        vtx_vector_field = None
+        
+        xdmf = None
+        if write_xdmf:
+            xdmf = XDMFFile(comm, xdmf_path, "w")
+            xdmf.write_mesh(domain)
+            xdmf.write_function(u_n, 0.0)
+            xdmf.write_function(magnitude, 0.0)
+            xdmf.write_function(energy_density, 0.0)
+            xdmf.write_function(curvature, 0.0)
+        
+        if write_vtx:
+            vtx_potential = VTXWriter(comm, vtx_potential_path, [u_n], engine=self.vtx_engine)
+            vtx_scalar_fields = VTXWriter(comm, vtx_scalar_path, [magnitude, energy_density, curvature], engine=self.vtx_engine)
+            vtx_vector_field = VTXWriter(comm, vtx_vector_path, [field_strength], engine=self.vtx_engine)
             
-            for step in range(self.time_steps):
-                self.current_time = (step + 1) * self.dt
+            vtx_potential.write(0.0)
+            vtx_scalar_fields.write(0.0)
+            vtx_vector_field.write(0.0)
+        
+        for step in range(self.time_steps):
+            self.current_time = (step + 1) * self.dt
+            u_new = self.solve_timestep(domain, V, u_n, self.current_time)
+            energy = self.compute_field_energy(domain, u_new)
+            energies.append(energy)
+            times.append(self.current_time)
+            u_n.x.array[:] = u_new.x.array
+            field_strength, magnitude, energy_density, curvature = self.compute_derived_fields(domain, V, u_n)
+            
+            if (step + 1) % self.write_interval == 0:
+                if write_vtx:
+                    vtx_potential.write(self.current_time)
+                    vtx_scalar_fields.write(self.current_time)
+                    vtx_vector_field.write(self.current_time)
                 
-                u_new = self.solve_timestep(domain, V, u_n, self.current_time)
-                
-                energy = self.compute_field_energy(domain, u_new)
-                energies.append(energy)
-                times.append(self.current_time)
-                
-                u_n.x.array[:] = u_new.x.array
-                
-                vtx.write(self.current_time)
-                
-                if (step + 1) % 10 == 0:
-                    print(f"  Step {step+1}/{self.time_steps}, t={self.current_time:.2f}, Energy={energy:.2e}")
+                if write_xdmf and xdmf is not None:
+                    xdmf.write_function(u_n, self.current_time)
+                    xdmf.write_function(magnitude, self.current_time)
+                    xdmf.write_function(energy_density, self.current_time)
+                    xdmf.write_function(curvature, self.current_time)
+            
+            if (step + 1) % 10 == 0:
+                print(f"  Step {step+1}/{self.time_steps}, t={self.current_time:.2f}, Energy={energy:.2e}")
+        
+        if xdmf is not None:
+            xdmf.close()
+            
+        if write_vtx:
+            vtx_potential.close()
+            vtx_scalar_fields.close()
+            vtx_vector_field.close()
         
         print(f"\nTime evolution complete!")
-        print(f"Results saved to {output_file}")
+        if write_vtx:
+            print(f"VTX results saved to:")
+            print(f"  - {vtx_potential_path}     (gravitational potential)")
+            print(f"  - {vtx_scalar_path} (field magnitude, energy density, curvature)")
+            print(f"  - {vtx_vector_path}  (field strength vector)")
+        if write_xdmf:
+            print(f"XDMF results saved to {xdmf_path}")
         
         return times, energies, u_n
     
@@ -174,8 +275,10 @@ class TimeEvolvingGravitationalField:
         plt.grid(True, alpha=0.3)
         plt.legend(fontsize=11)
         plt.tight_layout()
-        plt.savefig('energy_evolution.png', dpi=150, bbox_inches='tight')
-        print("Energy evolution plot saved to 'energy_evolution.png'")
+        
+        plot_path = os.path.join(PLOT_DIR, 'energy_evolution.png')
+        plt.savefig(plot_path, dpi=150, bbox_inches='tight')
+        print(f"Energy evolution plot saved to '{plot_path}'")
         plt.close()
 
 class ParticleTrajectories:
@@ -280,8 +383,10 @@ class ParticleTrajectories:
         ax.set_title('Particle Trajectories in Time-Evolving Gravitational Field', fontsize=13)
         
         plt.tight_layout()
-        plt.savefig('particle_trajectories.png', dpi=150, bbox_inches='tight')
-        print("Particle trajectories saved to 'particle_trajectories.png'")
+        
+        plot_path = os.path.join(PLOT_DIR, 'particle_trajectories.png')
+        plt.savefig(plot_path, dpi=150, bbox_inches='tight')
+        print(f"Particle trajectories saved to '{plot_path}'")
         plt.close()
 
 def main():
@@ -292,7 +397,7 @@ def main():
     
     schwarzschild_radius = 2.0
     domain_size = 20.0
-    mesh_resolution = 20
+    mesh_resolution = 30
     time_steps = 50
     dt = 0.1
     
@@ -301,7 +406,11 @@ def main():
         mesh_resolution=mesh_resolution,
         schwarzschild_radius=schwarzschild_radius,
         time_steps=time_steps,
-        dt=dt
+        dt=dt,
+        output_basename="gravitational_field",
+        output_format="both",
+        write_interval=1,
+        vtx_engine="BP4"
     )
     
     times, energies, final_field = field_sim.simulate()
@@ -316,17 +425,106 @@ def main():
     particle_sim.plot_trajectories(n_particles=8)
     
     print("\n" + "=" * 70)
+    print("CREATING PARAVIEW SETUP FILES")
+    print("=" * 70)
+    
+    try:
+        import paraview_setup
+        paraview_setup.OUTPUT_DIR = PARAVIEW_DIR
+        paraview_setup.create_paraview_python_script()
+        paraview_setup.create_quick_start_guide()
+        print("ParaView helper files created successfully!")
+    except Exception as e:
+        print(f"Note: Could not create ParaView setup files: {e}")
+    
+    print("\n" + "=" * 70)
     print("SIMULATION COMPLETE")
     print("=" * 70)
     print("\nGenerated files:")
-    print("  - time_evolution.bp/        (ParaView time series)")
-    print("  - energy_evolution.png      (Field energy over time)")
-    print("  - particle_trajectories.png (Test particle orbits)")
-    print("\nTo visualize in ParaView:")
-    print("  1. Open 'time_evolution.bp'")
-    print("  2. Use the time controls to animate the evolution")
-    print("  3. Apply filters (Slice, Contour) to explore the field")
+    print("  Data files:")
+    print(f"    - {os.path.join(VTX_DIR, 'gravitational_field_potential.bp')}     (VTX format - potential field)")
+    print(f"    - {os.path.join(VTX_DIR, 'gravitational_field_scalar_fields.bp')} (VTX format - magnitude, energy, curvature)")
+    print(f"    - {os.path.join(VTX_DIR, 'gravitational_field_vector_field.bp')}  (VTX format - vector field)")
+    print(f"    - {os.path.join(XDMF_DIR, 'gravitational_field.xdmf')}            (XDMF format - all fields)")
+    print("  Visualization files:")
+    print(f"    - {os.path.join(PLOT_DIR, 'energy_evolution.png')}                (Field energy over time)")
+    print(f"    - {os.path.join(PLOT_DIR, 'particle_trajectories.png')}           (Test particle orbits)")
+    print("  ParaView helper files:")
+    print(f"    - {os.path.join(PARAVIEW_DIR, 'paraview_script.py')}              (Auto-setup script for ParaView)")
+    print(f"    - {os.path.join(PARAVIEW_DIR, 'PARAVIEW_GUIDE.md')}               (Detailed visualization guide)")
+    
+    print("\n" + "=" * 70)
+    print("PARAVIEW VISUALIZATION GUIDE")
     print("=" * 70)
+    print("\n1. QUICK START (EASIEST):")
+    print("   - Open ParaView")
+    print("   - Tools → Python Shell → Run Script")
+    print("   - Select 'paraview_script.py'")
+    print("   - Visualization auto-configured!")
+    
+    print("\n2. MANUAL SETUP:")
+    print("   OPTION A (Recommended - time series):")
+    print("      - File → Open → Select one of the BP files:")
+    print("        * gravitational_field_potential.bp    (for potential field)")
+    print("        * gravitational_field_scalar_fields.bp (for magnitude, energy density)")
+    print("        * gravitational_field_vector_field.bp  (for vector field)")
+    print("      - Click 'Apply' in Properties panel")
+    print("   OPTION B (Alternative - all fields in one file):")
+    print("      - File → Open → Select 'gravitational_field.xdmf'")
+    print("      - Click 'Apply' in Properties panel")
+    
+    print("\n3. AVAILABLE FIELDS TO VISUALIZE:")
+    print("   - gravitational_potential : Gravitational potential field")
+    print("   - field_magnitude        : Magnitude of gravitational force")
+    print("   - energy_density         : Energy density distribution")
+    print("   - curvature_scalar       : Curvature-like quantity")
+    print("   - field_strength         : 3D vector field (gravitational force)")
+    
+    print("\n4. RECOMMENDED VISUALIZATION STEPS:")
+    print("\n   A. Volume Rendering (Best for initial view):")
+    print("      - Select 'field_magnitude' from the coloring dropdown")
+    print("      - Change representation to 'Volume'")
+    print("      - Adjust opacity in Color Map Editor")
+    print("      - Use 'Rescale to Custom Range' for better contrast")
+    
+    print("\n   B. Slice View (For cross-sections):")
+    print("      - Filters → Slice")
+    print("      - Set Origin to [0, 0, 0]")
+    print("      - Color by 'energy_density' or 'field_magnitude'")
+    print("      - Enable 'Show Plane' for orientation")
+    
+    print("\n   C. Contour/Isosurface (For equipotential surfaces):")
+    print("      - Filters → Contour")
+    print("      - Select 'gravitational_potential' as Contour By")
+    print("      - Add 5-10 isovalues")
+    print("      - Color by same field or different field")
+    
+    print("\n   D. Vector Field (Glyph visualization):")
+    print("      - Filters → Glyph")
+    print("      - Set 'Glyph Type' to Arrow")
+    print("      - Set 'Vectors' to 'field_strength'")
+    print("      - Scale by 'field_magnitude'")
+    print("      - Adjust 'Scale Factor' for visibility")
+    
+    print("\n   E. Streamlines (Field lines):")
+    print("      - Filters → Stream Tracer")
+    print("      - Set 'Vectors' to 'field_strength'")
+    print("      - Choose seed type (Point Cloud or Line)")
+    print("      - Adjust integration parameters")
+    
+    print("\n5. ANIMATION CONTROLS:")
+    print("   - Use time slider at top to scrub through timesteps")
+    print("   - Click play button to animate evolution")
+    print("   - Adjust animation speed in Settings")
+    
+    print("\n6. TIPS FOR BETTER VISUALIZATION:")
+    print("   - Use logarithmic color scale for high dynamic range")
+    print("   - Combine multiple filters (Clip + Slice)")
+    print("   - Adjust camera position for better perspective")
+    print("   - Save screenshots or animations via File → Save Screenshot/Animation")
+    print("   - Use 'Color Map Editor' to customize color schemes")
+    
+    print("\n" + "=" * 70)
 
 if __name__ == "__main__":
     main()
