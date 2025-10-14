@@ -1,398 +1,381 @@
-# Spacetime Simulations with Finite Element Methods
+# FEniCSx Spacetime Simulations
 
-A collection of spacetime simulations using the Finite Element Method (FEM) to model gravitational phenomena from flat 3D Euclidean space to curved 4D spacetime. This repository explores relativistic physics through computational methods, progressing from simple Newtonian gravitational fields to full general relativistic spacetime curvature.
+A collection of General Relativity and gravitational physics simulations using the Finite Element Method (FEM) through FEniCSx. This repository explores gravitational phenomena from Newtonian fields to full BSSN numerical relativity.
 
-## Project Vision
+## Overview
 
-This project aims to create a comprehensive suite of simulations that explore:
+This project provides a suite of progressively complex gravitational simulations:
 
-- **3D Flat Space**: Newtonian gravitational potentials in Euclidean geometry
-- **3D Curved Space**: Spatial curvature around massive objects
-- **4D Minkowski Spacetime**: Special relativistic effects in flat spacetime
-- **4D Curved Spacetime**: General relativistic spacetime curvature (Schwarzschild, Kerr metrics)
-- **Dynamic Spacetime**: Time-evolving gravitational fields and gravitational waves
+1. **Black Hole Simulations**: Time-evolving gravitational fields around Schwarzschild black holes
+2. **Solar System Simulations**: Curved spacetime geometry with real planetary data
+   - Post-Newtonian approximations
+   - Advanced BSSN formulation concepts
+   - Proper BSSN evolution equations
 
-## Current Simulations
+## Repository Structure
 
-### Black Hole Gravitational Potential (3D)
-Computes the gravitational potential field around supermassive black holes using real astronomical data from Astropy. Currently configured for Sgr A* (Sagittarius A*), the supermassive black hole at the center of our galaxy.
+```
+.
+├── blackhole_simulations/
+│   └── schwarzschild_field/       # Time-evolving Schwarzschild gravitational field
+│       ├── blackhole_simulation.py
+│       ├── paraview_setup.py
+│       ├── README.md
+│       └── outputs/
+├── solar_system_simulations/
+│   ├── post_newtonian/            # Post-Newtonian solar system dynamics
+│   │   ├── solar_system_spacetime.py
+│   │   ├── README.md
+│   │   └── outputs/
+│   ├── advanced_bssn/             # BSSN concepts demonstration
+│   │   ├── solar_system_advanced.py
+│   │   ├── README.md
+│   │   └── outputs/
+│   └── proper_bssn/               # Proper BSSN time evolution
+│       ├── solar_system_proper_bssn.py
+│       ├── README.md
+│       └── outputs/
+├── .gitattributes                 # Git LFS configuration
+├── .gitignore
+└── README.md                      # This file
+```
 
-## Features
+## Simulations
 
-- **Finite Element Method**: Sophisticated numerical technique for solving partial differential equations on complex geometries
-- **Astronomical Integration**: Real astronomical data from Astropy for physically accurate parameters
-- **Progressive Complexity**: From simple 3D simulations to full 4D spacetime curvature
-- **Interactive Visualization**: ParaView-compatible output for exploring 3D/4D fields
-- **Parallel Computing**: MPI-based parallel computation via PETSc for large-scale problems
-- **Modular Design**: Extensible framework for adding new spacetime configurations
+### 1. Schwarzschild Black Hole Gravitational Field
 
-## What is the Finite Element Method?
+**Location**: `blackhole_simulations/schwarzschild_field/`
 
-The Finite Element Method (FEM) is a powerful numerical technique for finding approximate solutions to partial differential equations (PDEs) that govern physical phenomena. Unlike finite difference methods that work on regular grids, FEM discretizes space into a mesh of elements with flexible shapes and sizes.
+A FEniCS-based simulation of time-evolving gravitational fields around a static Schwarzschild black hole.
 
-### Why FEM for Spacetime Simulations?
+**Features**:
+- 3D spatial mesh with time evolution
+- Schwarzschild geometry as initial condition
+- Multiple derived fields (potential, magnitude, energy density, curvature)
+- Test particle trajectory integration
+- ParaView-compatible VTX and XDMF output formats
 
-**Geometric Flexibility**: FEM handles complex geometries naturally, essential for curved spacetime regions near black holes, neutron stars, and other exotic objects.
+**Quick Start**:
+```bash
+cd blackhole_simulations/schwarzschild_field/
+python3 blackhole_simulation.py
+```
 
-**Weak Formulation**: FEM converts differential equations into integral form, allowing solutions even when derivatives don't exist classically (important for singularities).
+**Output**: All outputs saved in `outputs/` subdirectory (data files, plots, ParaView scripts)
 
-**Adaptive Refinement**: Mesh resolution can be concentrated where needed (near event horizons, strong curvature regions) while keeping coarse elements elsewhere.
+**Documentation**: See `blackhole_simulations/schwarzschild_field/README.md`
 
-**Mathematical Rigor**: FEM provides error estimates and convergence guarantees, ensuring simulation accuracy.
+### 2. Solar System Post-Newtonian Spacetime
 
-### How FEM Works
+**Location**: `solar_system_simulations/post_newtonian/`
 
-1. **Domain Discretization**: Divide the spacetime region into finite elements (tetrahedra, hexahedra in 3D)
-2. **Basis Functions**: Represent the unknown field as a combination of polynomial basis functions on each element
-3. **Weak Form**: Convert PDEs to integral equations through variational principles
-4. **Assembly**: Build a large sparse linear system Ax = b representing the entire problem
-5. **Solve**: Use iterative or direct solvers to find the solution vector
-6. **Visualization**: Reconstruct the continuous field from discrete solution
+Models the solar system as a curved spacetime using Post-Newtonian corrections to Newtonian gravity.
 
-### FEM in General Relativity
+**Features**:
+- Real astronomical data (Sun + 7 planets)
+- Accurate Keplerian orbits with eccentricities
+- Relativistic v²/c² corrections
+- Metric perturbations h_μν
+- Ricci curvature computation
+- Observable effects like Mercury's perihelion precession
 
-For spacetime simulations, FEM discretizes the Einstein field equations or their approximations:
+**Quick Start**:
+```bash
+cd solar_system_simulations/post_newtonian/
+python3 solar_system_spacetime.py
+```
 
-**Einstein Field Equations**: Gμν = 8πG/c⁴ Tμν
+**Documentation**: See `solar_system_simulations/post_newtonian/README.md`
 
-These nonlinear PDEs describe how matter-energy curves spacetime. FEM allows us to:
-- Solve for metric tensor components in curved spacetime
-- Compute geodesics and light paths
-- Model gravitational wave propagation
-- Simulate black hole mergers and cosmological evolution
+### 3. Advanced BSSN Solar System
+
+**Location**: `solar_system_simulations/advanced_bssn/`
+
+An educational implementation demonstrating BSSN formulation concepts applied to the solar system.
+
+**Features**:
+- Full 10-component metric tensor
+- BSSN variables (φ, γ̃_ij, K̃_ij, K, α, β^i)
+- 3+1 ADM decomposition framework
+- Conformal decomposition
+- Weyl curvature tensor
+- AMR concepts
+
+**Note**: This is a **pedagogical implementation** showing BSSN structure, not production-grade numerical relativity.
+
+**Quick Start**:
+```bash
+cd solar_system_simulations/advanced_bssn/
+python3 solar_system_advanced.py
+```
+
+**Documentation**: See `solar_system_simulations/advanced_bssn/README.md`
+
+### 4. Proper BSSN Solar System
+
+**Location**: `solar_system_simulations/proper_bssn/`
+
+A more rigorous BSSN implementation with actual time evolution equations and constraint monitoring.
+
+**Features**:
+- ✓ Proper conformal factor φ evolution
+- ✓ Trace extrinsic curvature K evolution with source terms
+- ✓ Dynamic lapse α (1+log slicing)
+- ✓ Hamiltonian and momentum constraint monitoring
+- ✓ Proper stress-energy tensor with Lorentz factors
+- ✓ Backward Euler time integration
+
+**Limitations**: Still simplified compared to production codes (Einstein Toolkit), but correctly evolves key BSSN variables.
+
+**Quick Start**:
+```bash
+cd solar_system_simulations/proper_bssn/
+python3 solar_system_proper_bssn.py
+```
+
+**Documentation**: See `solar_system_simulations/proper_bssn/README.md`
 
 ## Requirements
 
-### System Dependencies
-- Python 3.8+
-- FEniCSx (DOLFINx)
-- MPI implementation (OpenMPI or MPICH)
-- ParaView (for visualization)
+### Core Dependencies
+- **Python 3.8+**
+- **FEniCSx (DOLFINx)** - Finite element library
+- **MPI** - Parallel computing (OpenMPI or MPICH)
+- **ParaView** - Visualization (optional but recommended)
 
-### Python Dependencies
-```
+### Python Packages
+```bash
 numpy
 matplotlib
 scipy
-astropy>=7.1.1
 mpi4py
 petsc4py
 ```
 
 ## Installation
 
-### Option 1: Using DOLFINx Docker Container
+### Option 1: Docker (Recommended)
 ```bash
 docker pull dolfinx/dolfinx:stable
 docker run -ti -v $(pwd):/workspace dolfinx/dolfinx:stable
 ```
 
-### Option 2: Local Installation
+### Option 2: Conda Environment
 ```bash
-pip install numpy scipy matplotlib astropy mpi4py petsc4py
+conda create -n fenicsx-env
+conda activate fenicsx-env
+conda install -c conda-forge fenics-dolfinx mpich pyvista
+pip install matplotlib scipy
 ```
 
-Install FEniCSx following the official documentation at https://fenicsproject.org/download/
-
-## Usage
-
-### Running Simulations
-
-**Black Hole Gravitational Potential (Current)**
-```bash
-python3 blackhole.py
-```
-
-For parallel execution with MPI:
-```bash
-mpirun -n 4 python3 blackhole.py
-```
-
-**Future Simulations** (Planned)
-- `flat_space_gravity.py` - Newtonian gravity in 3D Euclidean space
-- `minkowski_spacetime.py` - Special relativistic spacetime
-- `schwarzschild_metric.py` - Static black hole spacetime geometry
-- `kerr_metric.py` - Rotating black hole spacetime
-- `gravitational_waves.py` - Dynamic spacetime ripples
-
-### Expected Output
-
-```
-FEniCSx loaded successfully
-Astropy loaded successfully
-Creating geometry for Sgr A*
-Mass: 4100000.0 solMass
-Schwarzschild radius: 12108325312.011024 m
-Domain size: 1.21e+12 m
-Created mesh with 8000 cells
-Schwarzschild radius: 1.21e+10 m
-Solving gravitational potential field...
-Black hole simulation complete!
-Potential field degrees of freedom: 9261
-Potential field L2 norm: 1.58e+16
-Results saved to blackhole_simulation.bp for ParaView visualization
-```
+### Option 3: System Installation
+Follow the official FEniCSx installation guide:
+https://github.com/FEniCS/dolfinx#installation
 
 ## Visualization with ParaView
 
-### Opening the Results
+All simulations export data in ParaView-compatible formats:
 
-1. Launch ParaView
-2. Go to **File → Open**
-3. Navigate to the simulation directory
-4. Select `blackhole_simulation.bp`
-5. Click **Apply** in the Properties panel
+1. **VTX/BP Format**: Time-series data (ADIOS2 BP4)
+2. **XDMF Format**: Universal compatibility
 
-### Visualization Options
+### Basic ParaView Workflow
 
-**Basic Visualization:**
-- In the dropdown menu, select `gravitational_potential`
-- Choose representation: Surface, Volume, or Points
-- Apply a color map to visualize field intensity
+1. Open ParaView
+2. File → Open → Navigate to simulation `outputs/data/vtx/` or `outputs/data/xdmf/`
+3. Select `.bp` or `.xdmf` file
+4. Click **Apply**
+5. Color by desired field
+6. Use filters: Slice, Contour, Stream Tracer, Clip
 
-**Advanced Techniques:**
-- **Slice Filter**: Cut through the 3D field to see cross-sections
-- **Contour Filter**: Create isosurfaces of constant potential
-- **Clip Filter**: Remove portions of the domain for interior views
-- **Glyph Filter**: Show field vectors or gradients
-- **Volume Rendering**: Enable opacity mapping for volumetric visualization
+### Automated Setup
 
-### Recommended Workflow
+Most simulations include auto-generated ParaView scripts:
+- `paraview_script.py` - Basic visualization setup
+- `PARAVIEW_GUIDE.md` - Detailed instructions
 
-1. Apply a **Slice** filter along the Z-axis to see the equatorial plane
-2. Use **Contour** filter to visualize gravitational equipotential surfaces
-3. Adjust color scale to highlight regions near the event horizon
-4. Enable **Show Color Legend** for quantitative reference
+## Understanding the Finite Element Method
 
-## Technical Details
+### What is FEM?
 
-### Current Implementation: Black Hole Gravitational Potential
+The Finite Element Method numerically solves partial differential equations by:
+1. Dividing space into finite elements (mesh)
+2. Approximating solutions with polynomial basis functions
+3. Converting PDEs to integral form (weak formulation)
+4. Solving large sparse linear systems
 
-**Simulation Parameters**
+### Why FEM for General Relativity?
 
-| Parameter | Value | Description |
-|-----------|-------|-------------|
-| Black Hole | Sgr A* | Supermassive black hole at Galactic center |
-| Mass | 4.1 × 10⁶ M☉ | Solar masses |
-| Schwarzschild Radius | ~1.21 × 10¹⁰ m | Event horizon radius |
-| Domain Size | 100 × rs | Computational domain extends 100 Schwarzschild radii |
-| Mesh Resolution | 20 × 20 × 20 | Hexahedral elements |
-| Total Cells | 8000 | Finite elements |
-| Degrees of Freedom | 9261 | Solution vector size |
+- **Geometric Flexibility**: Handles curved spacetime naturally
+- **Adaptive Refinement**: Concentrate resolution near strong curvature
+- **Weak Formulation**: Works even with singularities
+- **Mathematical Rigor**: Error estimates and convergence guarantees
 
-**Mathematical Model**
+### FEM in These Simulations
 
-Solves Laplace's equation for the gravitational potential:
+All simulations use:
+- **Element Type**: Hexahedral (3D) or tetrahedral cells
+- **Function Space**: Lagrange polynomials (P1 or P2)
+- **Linear Solvers**: CG, GMRES with preconditioners (Hypre, Jacobi)
+- **Parallel**: MPI domain decomposition via PETSc
+- **Output**: ADIOS2 BP4 format for scalability
 
-∇²φ = 0
+## Mathematical Background
 
-With Dirichlet boundary conditions based on the Schwarzschild potential:
+### Black Hole Simulation
 
-φ(r) = -rs / (2r)
-
-where rs is the Schwarzschild radius and r is the distance from the black hole center.
-
-**Numerical Method**
-
-- **Discretization**: Finite Element Method (FEM)
-- **Element Type**: Hexahedral cells
-- **Function Space**: Lagrange polynomials of degree 1
-- **Solver**: Direct LU factorization via PETSc
-- **Parallel**: MPI-based domain decomposition
-
-### Future Implementations
-
-**Schwarzschild Metric (4D Spacetime)**
-
-Metric tensor components:
+Solves time-dependent Poisson equation:
 ```
-ds² = -(1 - rs/r)dt² + (1 - rs/r)⁻¹dr² + r²(dθ² + sin²θ dφ²)
+α(∂u/∂t) + ∇²u = f(x,t)
+```
+with Schwarzschild initial conditions.
+
+### Post-Newtonian Solar System
+
+Metric perturbation:
+```
+g_μν = η_μν + h_μν
+h_00 ≈ 2Φ/c²
+```
+with corrections:
+```
+Φ_PN = Φ_Newton + (v²/2c²)Φ_Newton + (GM/rc²)Φ_Newton
 ```
 
-**Kerr Metric (Rotating Black Hole)**
+### BSSN Formulation
 
-Includes angular momentum parameter a:
+3+1 decomposition of Einstein equations:
 ```
-ds² = -(1 - rs·r/Σ)dt² + (Σ/Δ)dr² + Σdθ² + ... (frame dragging terms)
-```
-
-**Gravitational Waves**
-
-Time-dependent metric perturbations hμν:
-```
-gμν = ημν + hμν(t, x, y, z)
-∂²hμν/∂t² - ∇²hμν = source terms
+ds² = -α²dt² + γ_ij(dx^i + β^idt)(dx^j + β^jdt)
 ```
 
-## Project Structure
+Key evolution equations:
+- Conformal factor: ∂_t φ = -(1/6) α K + β^i ∂_i φ
+- Trace K: ∂_t K = -D_i D^i α + α(A_ij A^ij + K²/3) + source
+- Lapse (1+log): ∂_t α = -2 α K + β^i ∂_i α
 
-```
-.
-├── blackhole.py                    # Black hole gravitational potential (3D)
-├── flat_space_gravity.py           # Newtonian gravity (3D) [planned]
-├── minkowski_spacetime.py          # Special relativity (4D) [planned]
-├── schwarzschild_metric.py         # Static black hole metric (4D) [planned]
-├── kerr_metric.py                  # Rotating black hole metric (4D) [planned]
-├── gravitational_waves.py          # Dynamic spacetime (4D) [planned]
-├── requirements.txt                # Python dependencies
-├── README.md                       # This file
-└── output/                         # Simulation results
-    ├── blackhole_simulation.bp/    # ParaView format
-    └── ...
-```
+## Performance Considerations
 
-## Developing New Simulations
+### Computational Complexity
+- 3D simulations: O(n³) scaling with resolution
+- Time evolution: O(N_t × n³) for N_t timesteps
+- Memory: Depends on DOF and solver type
 
-### Simulation Development Roadmap
+### Recommended Resources
+- **Black Hole**: 4 CPU cores, 8 GB RAM (30³ mesh)
+- **Post-Newtonian**: 4-8 cores, 16 GB RAM (25³ mesh)
+- **BSSN**: 8+ cores, 32 GB RAM (20³ mesh)
 
-**Phase 1: 3D Flat Space** (Newtonian Limit)
-- Solve Poisson equation: ∇²φ = 4πGρ
-- Multiple mass configurations
-- Tidal forces and equipotential surfaces
-
-**Phase 2: 3D Curved Space** (Spatial Geometry)
-- Embed curved surfaces in higher dimensions
-- Geodesics on curved manifolds
-- Intrinsic vs extrinsic curvature
-
-**Phase 3: 4D Minkowski Spacetime** (Special Relativity)
-- Light cones and causality
-- Lorentz transformations
-- Time dilation and length contraction fields
-
-**Phase 4: 4D Schwarzschild Spacetime** (Static Black Holes)
-- Solve for metric components gμν
-- Proper time along geodesics
-- Photon orbits and gravitational lensing
-
-**Phase 5: 4D Kerr Spacetime** (Rotating Black Holes)
-- Frame dragging visualization
-- Ergosphere geometry
-- Penrose process energy extraction
-
-**Phase 6: Dynamic Spacetime** (Gravitational Waves)
-- Time-dependent metric evolution
-- Wave propagation and interference
-- Binary merger simulations
-
-### Customization Guide
-
-**Modifying Existing Simulations**
-
-For `blackhole.py`:
-- **Mesh resolution**: `[20, 20, 20]` in `mesh.create_box()`
-- **Domain size**: multiplier `100 * rs.value`
-- **Black hole mass**: Change in `create_astronomical_blackhole_geometry()`
-- **Solver options**: `petsc_options` dictionary parameters
-
-**Creating New Astronomical Objects**
-
-```python
-elif blackhole_name == "M87*":
-    mass = 6.5e9 * u.M_sun
-    distance = 16.8 * u.Mpc
-    coordinates = SkyCoord('12h30m49.4233s', '+12d23m28.044s', frame='icrs')
+### Parallelization
+All simulations support MPI:
+```bash
+mpirun -n 4 python3 simulation_script.py
 ```
 
-**Implementing New Spacetime Geometries**
+## Git LFS Configuration
 
-1. Define the metric tensor gμν or potential φ
-2. Formulate governing PDEs (Einstein equations, geodesic equations, etc.)
-3. Convert to weak form for FEM
-4. Set up mesh and function spaces in DOLFINx
-5. Implement boundary conditions
-6. Solve and export for visualization
+Large output files (>99MB) are managed with Git LFS:
 
-## Performance Notes
+- Tracked file types: `*.bp`, `*.h5`, `*.xdmf`
+- Automatic tracking for `outputs/data/` directories
+- Pre-commit hook for automatic LFS tracking
 
-- Computation time scales with mesh resolution (O(n³) for 3D, O(n⁴) for 4D spacetime)
-- Memory usage depends on degrees of freedom and solver type
-- Parallel execution recommended for high-resolution meshes (100+ elements per dimension)
-- Direct solvers (LU) are robust but memory-intensive for large problems
-- Iterative solvers (GMRES, CG) scale better for massive simulations
-- 4D spacetime simulations require significantly more resources than 3D spatial problems
+**Setup**:
+```bash
+git lfs install
+```
 
-## Contributing
+See `.gitattributes` for tracking rules.
 
-This is an active research and educational project. Contributions are welcome in several areas:
+## Learning Path
 
-### Simulation Development
-- Implement planned simulations (flat space, Minkowski, Kerr, etc.)
-- Add new spacetime metrics or gravitational configurations
-- Optimize existing solvers for performance
+### Beginner
+1. Start with **Schwarzschild Black Hole** simulation
+2. Understand basic field visualization in ParaView
+3. Explore test particle trajectories
 
-### Visualization
-- Create ParaView state files for common visualization workflows
-- Develop custom filters for GR-specific quantities (Riemann tensor, Christoffel symbols)
-- Build interactive dashboards for parameter exploration
+### Intermediate
+1. Run **Post-Newtonian Solar System**
+2. Compare Newtonian vs relativistic effects
+3. Visualize metric perturbations and curvature
 
-### Documentation
-- Add tutorials for specific physics concepts
-- Create Jupyter notebooks with step-by-step explanations
-- Document FEM theory for relativistic PDEs
+### Advanced
+1. Study **Advanced BSSN** for formulation concepts
+2. Run **Proper BSSN** to see evolution equations
+3. Monitor constraint violations
+4. Explore Einstein Toolkit for production simulations
 
-### Validation
-- Compare results against analytical solutions
-- Benchmark performance across different mesh resolutions
-- Verify physical accuracy of computed fields
+## Production Numerical Relativity
 
-**How to Contribute**
-1. Fork the repository
-2. Create a feature branch
-3. Implement your simulation/improvement
-4. Add tests and documentation
-5. Submit a pull request
+For research-grade simulations, use:
 
-## Roadmap
+### Einstein Toolkit
+- Full BSSN/CCZ4 evolution
+- Carpet AMR
+- Gravitational waveform extraction
+- https://einsteintoolkit.org
 
-**Short Term**
--  Black hole gravitational potential (3D)
--  Newtonian gravity with multiple masses
--  Geodesic path computation and visualization
--  Gravitational lensing ray tracing
+### GRChombo
+- Modern C++ implementation
+- Chombo AMR framework
+- Designed for scalar field cosmology
+- https://github.com/GRChombo/GRChombo
 
-**Medium Term**
--  Schwarzschild metric full 4D implementation
--  Proper time and coordinate time fields
--  Kerr metric for rotating black holes
--  Tidal tensor visualization
-
-**Long Term**
--  Time-evolving gravitational wave simulation
--  Binary black hole merger
--  Cosmological spacetime expansion
--  Numerical relativity integration (3+1 formalism)
-
-## Acknowledgments
-
-This project builds upon powerful scientific computing tools:
-
-- **FEniCSx**: High-performance finite element library for solving PDEs
-- **Astropy**: Comprehensive astronomical data and coordinate transformations
-- **PETSc**: Portable, Extensible Toolkit for Scientific Computation
-- **ParaView**: Open-source scientific visualization platform
-- **MPI**: Message Passing Interface for parallel computing
+### SpEC (Caltech)
+- Spectral methods
+- Binary black hole simulations
+- SXS waveform catalog
+- https://www.black-holes.org/code/SpEC.html
 
 ## References
 
-### General Relativity & Numerical Methods
-- Misner, Thorne & Wheeler (1973). "Gravitation" - The classic GR reference
-- Schwarzschild, K. (1916). "On the Gravitational Field of a Mass Point"
-- Alcubierre, M. (2008). "Introduction to 3+1 Numerical Relativity"
-- Baumgarte & Shapiro (2010). "Numerical Relativity"
+### General Relativity
+1. Misner, Thorne & Wheeler (1973). "Gravitation"
+2. Carroll, S. (2004). "Spacetime and Geometry"
+3. Wald, R. (1984). "General Relativity"
+
+### Numerical Relativity
+4. Baumgarte & Shapiro (2010). "Numerical Relativity"
+5. Alcubierre, M. (2008). "Introduction to 3+1 Numerical Relativity"
+6. Gourgoulhon, E. (2012). "3+1 Formalism in General Relativity"
+
+### BSSN Formulation
+7. Baumgarte & Shapiro (1999). Phys. Rev. D 59, 024007
+8. Shibata & Nakamura (1995). Phys. Rev. D 52, 5428
 
 ### Finite Element Methods
-- Zienkiewicz & Taylor (2000). "The Finite Element Method"
-- Hughes, T.J.R. (2000). "The Finite Element Method: Linear Static and Dynamic FEA"
-- Logg, Mardal & Wells (2012). "Automated Solution of Differential Equations by FEM"
+9. Logg, Mardal & Wells (2012). "Automated Solution of Differential Equations by FEM"
+10. Zienkiewicz & Taylor (2000). "The Finite Element Method"
 
 ### Software Documentation
-- FEniCSx Documentation: https://fenicsproject.org/
-- Astropy Documentation: https://www.astropy.org/
-- PETSc Documentation: https://petsc.org/
-- ParaView User Guide: https://www.paraview.org/
+- FEniCSx: https://docs.fenicsproject.org
+- ParaView: https://www.paraview.org/documentation
+- PETSc: https://petsc.org/release/docs/
+- ADIOS2: https://adios2.readthedocs.io
 
-## Contact & Citation
+## Contributing
 
-If you use this code in your research or educational materials, please cite this repository and acknowledge the underlying software packages (FEniCSx, Astropy, PETSc).
+Contributions are welcome! Areas of interest:
+
+- New simulation implementations
+- Performance optimizations
+- Enhanced visualization scripts
+- Documentation improvements
+- Validation against analytical solutions
+
+## Acknowledgments
+
+This project uses:
+- **FEniCSx/DOLFINx** - High-performance FEM library
+- **PETSc** - Scalable scientific computation
+- **MPI** - Parallel computing
+- **ADIOS2** - I/O framework for large-scale simulations
+- **ParaView** - Scientific visualization platform
+
+## Contact
+
+For questions, issues, or contributions, please use the GitHub issue tracker.
+
+---
+
 
