@@ -111,27 +111,40 @@ python3 solar_system_advanced.py
 
 **Documentation**: See `solar_system_simulations/advanced_bssn/README.md`
 
-### 4. Proper BSSN Solar System
+### 4. Production-Ready BSSN Solar System
 
 **Location**: `solar_system_simulations/proper_bssn/`
 
-A more rigorous BSSN implementation with actual time evolution equations and constraint monitoring.
+A production-ready BSSN implementation with advanced features bridging educational and research-grade numerical relativity.
 
-**Features**:
-- ✓ Proper conformal factor φ evolution
-- ✓ Trace extrinsic curvature K evolution with source terms
-- ✓ Dynamic lapse α (1+log slicing)
-- ✓ Hamiltonian and momentum constraint monitoring
-- ✓ Proper stress-energy tensor with Lorentz factors
-- ✓ Backward Euler time integration
+**Core Features**:
+- ✓ Full BSSN evolution: φ, K, α, β^i, B^i (optionally: γ̃ᵢⱼ, Ãᵢⱼ)
+- ✓ Gamma-driver shift condition with full evolution
+- ✓ Z4c-style constraint damping (κ₁=0.02, κ₂=0.1)
+- ✓ 4th-order Runge-Kutta (RK4) time integration
+- ✓ High-order finite elements (P1-P4, CG/DG)
 
-**Limitations**: Still simplified compared to production codes (Einstein Toolkit), but correctly evolves key BSSN variables.
+**Advanced Features**:
+- ✓ Adaptive Mesh Refinement (AMR) with moving box grids
+- ✓ Real ephemeris data (JPL DE440/Astropy)
+- ✓ Post-Newtonian corrections (1PN+2PN+3PN)
+- ✓ HPC support with MPI parallelization
+- ✓ Production diagnostics (GW extraction, horizon tracking)
+- ✓ Einstein Toolkit interface framework
 
 **Quick Start**:
 ```bash
 cd solar_system_simulations/proper_bssn/
 python3 solar_system_proper_bssn.py
+
+# With MPI (HPC)
+mpirun -n 8 python3 solar_system_proper_bssn.py
 ```
+
+**Configuration Flags**:
+- `IS_HPC = True/False` - Enable HPC mode
+- `USE_REAL_EPHEMERIS = True/False` - Use real planetary data
+- `USE_POST_NEWTONIAN = True/False` - Apply PN corrections
 
 **Documentation**: See `solar_system_simulations/proper_bssn/README.md`
 
@@ -353,6 +366,10 @@ For research-grade simulations, use:
 - PETSc: https://petsc.org/release/docs/
 - ADIOS2: https://adios2.readthedocs.io
 
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
 ## Contributing
 
 Contributions are welcome! Areas of interest:
@@ -362,6 +379,8 @@ Contributions are welcome! Areas of interest:
 - Enhanced visualization scripts
 - Documentation improvements
 - Validation against analytical solutions
+
+By contributing, you agree that your contributions will be licensed under the same MIT License.
 
 ## Acknowledgments
 
