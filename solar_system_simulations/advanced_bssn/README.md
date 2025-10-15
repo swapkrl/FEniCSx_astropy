@@ -10,17 +10,17 @@ This simulation demonstrates BSSN formulation concepts applied to the solar syst
 
 ## Features Implemented
 
-### ✓ Full Metric Tensor
+### Yes Full Metric Tensor
 - All 10 independent components of h_μν
 - Symmetric 3×3 spatial metric perturbation
 - Post-Newtonian velocity corrections
 
-### ✓ 4D Spacetime Framework
+### Yes 4D Spacetime Framework
 - 3+1 ADM decomposition concepts
 - Foliation into spatial hypersurfaces
 - Spacetime structure representation
 
-### ✓ BSSN Variables
+### Yes BSSN Variables
 - **φ** (conformal factor): γ = φ⁴ γ̃
 - **γ̃_ij** (conformal metric): det(γ̃) = 1
 - **K̃_ij** (conformal extrinsic curvature)
@@ -28,12 +28,12 @@ This simulation demonstrates BSSN formulation concepts applied to the solar syst
 - **α** (lapse function): time dilation factor
 - **β^i** (shift vector): spatial coordinate mapping
 
-### ✓ Advanced Curvature
+### Yes Advanced Curvature
 - Weyl curvature tensor (gravitational waves)
 - Ricci scalar computation
 - Constraint equations
 
-### ✓ AMR Concepts
+### Yes AMR Concepts
 - Refinement strategy near massive bodies
 - Multi-scale resolution planning
 - Adaptive mesh concepts
@@ -129,13 +129,13 @@ The BSSN formulation evolves 25 variables:
 ### Time Dilation
 Near Sun's surface:
 ```
-α ≈ 1 - GM☉/(c²R☉) ≈ 0.999998
+α ≈ 1 - GM/(c²R) ≈ 0.999998
 ```
 Clocks run ~2 μs slower per day than at infinity.
 
 ### Spacetime Curvature Scale
 Metric perturbation:
-- Near Sun: h ≈ 4×10⁻⁶ (weak field ✓)
+- Near Sun: h ≈ 4×10⁻⁶ (weak field Yes)
 - Near Earth orbit: h ≈ 2×10⁻⁸
 - Near Jupiter orbit: h ≈ 4×10⁻⁹
 
@@ -211,9 +211,9 @@ These codes represent decades of development and extensive testing.
 
 ```
 outputs/
-├── data/
-│   └── vtx/              # BSSN variable time series
-└── plots/                # Trajectory visualizations
+ data/
+    vtx/              # BSSN variable time series
+ plots/                # Trajectory visualizations
 ```
 
 ---

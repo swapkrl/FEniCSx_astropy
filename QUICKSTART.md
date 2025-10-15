@@ -1,17 +1,17 @@
 # Quick Start Guide - Production BSSN with Real Data
 
-## ✅ What's Already Working
+##  What's Already Working
 
 Your simulation is **100% operational** with:
-- ✓ **Real planetary ephemeris** via Astropy (meter-level accuracy)
-- ✓ **Post-Newtonian corrections** (1PN+2PN+3PN)
-- ✓ **Production BSSN evolution** (φ, K, α, β^i, B^i)
-- ✓ **Adaptive Mesh Refinement** (AMR)
-- ✓ **Z4c constraint damping** (κ₁=0.02, κ₂=0.1)
-- ✓ **4th-order Runge-Kutta** time integration
-- ✓ **Production diagnostics** (GW, horizons, conservation)
+- Yes **Real planetary ephemeris** via Astropy (meter-level accuracy)
+- Yes **Post-Newtonian corrections** (1PN+2PN+3PN)
+- Yes **Production BSSN evolution** (φ, K, α, β^i, B^i)
+- Yes **Adaptive Mesh Refinement** (AMR)
+- Yes **Z4c constraint damping** (κ₁=0.02, κ₂=0.1)
+- Yes **4th-order Runge-Kutta** time integration
+- Yes **Production diagnostics** (GW, horizons, conservation)
 
-## 🚀 Run the Simulation (30 seconds)
+##  Run the Simulation (30 seconds)
 
 ```bash
 cd /workspace/solar_system_simulations/proper_bssn
@@ -20,12 +20,12 @@ python3 solar_system_proper_bssn.py
 
 **You'll see**:
 ```
-✓ Using Astropy ephemeris system (built-in ephemeris)
+Yes Using Astropy ephemeris system (built-in ephemeris)
 Real ephemeris data integration (JPL/Astropy)
-✓ Earth position: (-0.184, 0.885, 0.384) AU
+Yes Earth position: (-0.184, 0.885, 0.384) AU
 ```
 
-## 📊 View Results
+##  View Results
 
 ### Diagnostic Plots
 ```bash
@@ -51,18 +51,18 @@ Open in ParaView:
 paraview outputs/data/vtx/phi.bp
 ```
 
-## 🔧 Configuration Flags
+##  Configuration Flags
 
 Edit `solar_system_proper_bssn.py`:
 
 ```python
 IS_HPC = False                  # True for cluster deployment
-USE_REAL_EPHEMERIS = True       # ✓ Already enabled!
+USE_REAL_EPHEMERIS = True       # Yes Already enabled!
 USE_EINSTEIN_TOOLKIT = False    # True after ET installation
-USE_POST_NEWTONIAN = True       # ✓ Already enabled!
+USE_POST_NEWTONIAN = True       # Yes Already enabled!
 ```
 
-## ⚙️ Adjust Parameters
+##  Adjust Parameters
 
 Memory-optimized defaults (current):
 ```python
@@ -79,7 +79,7 @@ element_order=3           # 16 GB RAM
 mesh_resolution=20        # 32+ GB RAM
 ```
 
-## 🎯 Optional Upgrades
+##  Optional Upgrades
 
 ### 1. High-Precision Ephemeris (Millimeter-level)
 
@@ -95,7 +95,7 @@ Downloads JPL DE440 (114 MB, 5-15 min). Then update code to use SPICE.
 ```
 Full Einstein Toolkit (2-4 hours, 3 GB). Provides industrial-strength AMR.
 
-## 📚 Documentation
+##  Documentation
 
 | File | Purpose |
 |------|---------|
@@ -105,11 +105,11 @@ Full Einstein Toolkit (2-4 hours, 3 GB). Provides industrial-strength AMR.
 | `scripts/README.md` | Installation instructions |
 | `LICENSE` | MIT License (Swapnil Karel) |
 
-## 🔍 Verification Commands
+##  Verification Commands
 
 ### Check Real Ephemeris
 ```bash
-python3 -c "from solar_system_simulations.proper_bssn.solar_system_proper_bssn import *; print('Ephemeris:', 'WORKING ✓' if USE_REAL_EPHEMERIS and ASTROPY_AVAILABLE else 'OFF')"
+python3 -c "from solar_system_simulations.proper_bssn.solar_system_proper_bssn import *; print('Ephemeris:', 'WORKING Yes' if USE_REAL_EPHEMERIS and ASTROPY_AVAILABLE else 'OFF')"
 ```
 
 ### Check Current Earth Position
@@ -130,11 +130,11 @@ python3 -c "
 import glob
 plots = glob.glob('/workspace/solar_system_simulations/proper_bssn/outputs/plots/*.png')
 print('Diagnostic Plots:')
-for p in sorted(plots): print(f'  ✓ {p.split(\"/\")[-1]}')
+for p in sorted(plots): print(f'  Yes {p.split(\"/\")[-1]}')
 "
 ```
 
-## 🐛 Troubleshooting
+##  Troubleshooting
 
 ### Simulation crashes
 ```bash
@@ -161,7 +161,7 @@ import numpy as np
 "
 ```
 
-## 💡 Tips
+##  Tips
 
 1. **Start small**: Use default parameters first (mesh_resolution=10)
 2. **Check plots**: Look at `outputs/plots/` after each run
@@ -169,23 +169,23 @@ import numpy as np
 4. **Use ParaView**: Best way to visualize 3D BSSN evolution
 5. **Read docs**: See `SETUP_SUMMARY.md` for complete details
 
-## 🎉 Success Indicators
+##  Success Indicators
 
 Your simulation is working if you see:
 ```
-✓ Using Astropy ephemeris system (built-in ephemeris)
-✓ Real ephemeris data integration (JPL/Astropy)
-✓ Production Monitoring System Initialized
-✓ Hamiltonian constraint: ~1e-45
-✓ Momentum constraint: ~1e-41
-✓ Plots saved to outputs/plots/
+Yes Using Astropy ephemeris system (built-in ephemeris)
+Yes Real ephemeris data integration (JPL/Astropy)
+Yes Production Monitoring System Initialized
+Yes Hamiltonian constraint: ~1e-45
+Yes Momentum constraint: ~1e-41
+Yes Plots saved to outputs/plots/
 ```
 
 ---
 
 **Quick Command**: `cd /workspace/solar_system_simulations/proper_bssn && python3 solar_system_proper_bssn.py`
 
-**Status**: ✅ 100% OPERATIONAL with Real Ephemeris Data
+**Status**:  100% OPERATIONAL with Real Ephemeris Data
 
 Last Updated: October 15, 2025
 

@@ -4,7 +4,7 @@ This directory contains optional installation scripts for advanced features of t
 
 ## Real Ephemeris Data
 
-### Option 1: Astropy (Built-in) ✓ **RECOMMENDED**
+### Option 1: Astropy (Built-in) Yes **RECOMMENDED**
 
 **Status**: Already installed and working!
 
@@ -79,7 +79,7 @@ Creates a minimal framework for testing the interface without compilation.
 - Disk Space: ~3 GB  
 - Dependencies: gcc, gfortran, MPI, HDF5, etc.
 
-For production ET work, we recommend:
+For production ET work, the authors recommend:
 1. Using a pre-configured cluster with ET installed
 2. The official Docker image
 3. Contacting the Einstein Toolkit community for the latest build instructions
@@ -125,8 +125,8 @@ After installation, verify your setup:
 
 ```bash
 # Check Python dependencies
-python3 -c "import astropy; print(f'Astropy {astropy.__version__} ✓')"
-python3 -c "import spiceypy; print(f'SPICE {spiceypy.tkvrsn(\"TOOLKIT\")} ✓')"
+python3 -c "import astropy; print(f'Astropy {astropy.__version__} Yes')"
+python3 -c "import spiceypy; print(f'SPICE {spiceypy.tkvrsn(\"TOOLKIT\")} Yes')"
 
 # Check SPICE kernels
 ls -lh /workspace/data/spice_kernels/
