@@ -1,0 +1,31 @@
+# Minimal test parameter file for Einstein Toolkit interface testing
+ActiveThorns = "CarpetLib Carpet CarpetReduce CartGrid3D CoordBase SymBase Boundary Time MoL"
+
+Cactus::cctk_run_title = "BSSN Test"
+Cactus::cctk_full_warnings         = yes
+
+# Grid setup
+CartGrid3D::type         = "coordbase"
+CartGrid3D::domain       = "full"
+CartGrid3D::avoid_origin = "no"
+
+CoordBase::domainsize = "minmax"
+
+CoordBase::xmin = -10.0
+CoordBase::ymin = -10.0
+CoordBase::zmin = -10.0
+CoordBase::xmax = +10.0
+CoordBase::ymax = +10.0
+CoordBase::zmax = +10.0
+
+CoordBase::dx = 0.5
+CoordBase::dy = 0.5
+CoordBase::dz = 0.5
+
+# Time evolution
+Cactus::cctk_initial_time = 0.0
+Cactus::cctk_final_time   = 1.0
+Time::dtfac = 0.25
+
+# Output
+IO::out_dir = "$parfile"
