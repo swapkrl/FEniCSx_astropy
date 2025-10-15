@@ -1,5 +1,5 @@
 {
-	"name": "FEniCS-Dolfinx",
+	"name": "FEniCS-Dolfinx Production BSSN",
 	"image": "dolfinx/dolfinx:stable",
 	
 	"customizations": {
@@ -9,7 +9,8 @@
 				"ms-python.vscode-pylance",
 				"ms-toolsai.jupyter",
 				"ms-toolsai.jupyter-keymap",
-				"ms-toolsai.jupyter-renderers"
+				"ms-toolsai.jupyter-renderers",
+				"ms-vscode.cpptools"
 			],
 			"settings": {
 				"python.defaultInterpreterPath": "/dolfinx-env/bin/python3",
@@ -21,11 +22,20 @@
 		}
 	},
 	
+	"features": {
+		"ghcr.io/devcontainers/features/git:1": {},
+		"ghcr.io/devcontainers/features/github-cli:1": {}
+	},
+	
 	"workspaceFolder": "/workspace",
 	"workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
 	
-	"postCreateCommand": "pip install matplotlib numpy scipy astropy paraview-connect spiceypy && pip install -r requirements.txt",
+	"postCreateCommand": "bash -c 'pip install matplotlib numpy scipy astropy spiceypy h5py && if [ -f requirements.txt ]; then pip install -r requirements.txt; fi && echo \"\" && echo \"=== Production BSSN Environment Ready ===\" && echo \"Real ephemeris: Astropy (built-in) ✓\" && echo \"Optional SPICE: Run scripts/install_spice_kernels.sh\" && echo \"Optional Einstein Toolkit: Run scripts/install_einstein_toolkit.sh\" && echo \"\" && echo \"Quick start: cd solar_system_simulations/proper_bssn && python3 solar_system_proper_bssn.py\"'",
 	
-	"remoteUser": "root"
+	"remoteUser": "root",
+	
+	"mounts": [
+		"source=${localWorkspaceFolder}/data,target=/workspace/data,type=bind"
+	]
 }
 

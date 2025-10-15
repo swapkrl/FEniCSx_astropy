@@ -118,19 +118,19 @@ python3 solar_system_advanced.py
 A production-ready BSSN implementation with advanced features bridging educational and research-grade numerical relativity.
 
 **Core Features**:
-- ✓ Full BSSN evolution: φ, K, α, β^i, B^i (optionally: γ̃ᵢⱼ, Ãᵢⱼ)
-- ✓ Gamma-driver shift condition with full evolution
-- ✓ Z4c-style constraint damping (κ₁=0.02, κ₂=0.1)
-- ✓ 4th-order Runge-Kutta (RK4) time integration
-- ✓ High-order finite elements (P1-P4, CG/DG)
+-  Full BSSN evolution: φ, K, α, β^i, B^i (optionally: γ̃ᵢⱼ, Ãᵢⱼ)
+-  Gamma-driver shift condition with full evolution
+-  Z4c-style constraint damping (κ₁=0.02, κ₂=0.1)
+-  4th-order Runge-Kutta (RK4) time integration
+-  High-order finite elements (P1-P4, CG/DG)
 
 **Advanced Features**:
-- ✓ Adaptive Mesh Refinement (AMR) with moving box grids
-- ✓ Real ephemeris data (JPL DE440/Astropy)
-- ✓ Post-Newtonian corrections (1PN+2PN+3PN)
-- ✓ HPC support with MPI parallelization
-- ✓ Production diagnostics (GW extraction, horizon tracking)
-- ✓ Einstein Toolkit interface framework
+-  Adaptive Mesh Refinement (AMR) with moving box grids
+-  Real ephemeris data (JPL DE440/Astropy)
+-  Post-Newtonian corrections (1PN+2PN+3PN)
+-  HPC support with MPI parallelization
+-  Production diagnostics (GW extraction, horizon tracking)
+-  Einstein Toolkit interface framework
 
 **Quick Start**:
 ```bash

@@ -1,46 +1,10 @@
-"""
-Production-Ready BSSN Solar System Gravitational Simulation
-
-ENHANCEMENTS IMPLEMENTED:
-========================
-
-Step 1: Configuration & Real Ephemeris Integration
-- Configuration flags: IS_HPC, USE_REAL_EPHEMERIS, USE_POST_NEWTONIAN
-- Optional SPICE toolkit integration for JPL DE440 ephemeris (millimeter accuracy)
-- Astropy integration for built-in ephemeris data
-- Post-Newtonian corrections (1PN, 2PN, 3PN) to stress-energy tensor
-- Enhanced stress-energy with relativistic corrections
-
-Step 2: Full Tensor Evolution (Non-linearized BSSN)
-- Full nonlinear evolution of conformal metric γ̃ᵢⱼ
-- Full evolution of conformal extrinsic curvature Ãᵢⱼ
-- Ricci tensor computation from conformal metric
-- Component-wise tensor evolution equations
-- Optional: enable with use_full_tensor_evolution=True (more accurate, slower)
-
-Step 3: HPC Optimizations & Proper Constraint Enforcement
-- HPC-specific parallelization when IS_HPC=True
-- Proper Hamiltonian constraint computation (not zero)
-- Proper momentum constraint computation
-- MPI-aware domain decomposition
-- Load balancing for cluster deployment
-- Einstein Toolkit interface framework (prepared for coupling)
-
-USAGE:
-======
-- Set IS_HPC=True for HPC cluster deployment
-- Set USE_REAL_EPHEMERIS=True to use JPL/Astropy data (requires installation)
-- Set USE_POST_NEWTONIAN=True for PN corrections (enabled by default)
-- Pass use_full_tensor_evolution=True to ProperBSSNEvolution for full tensor evolution
-"""
-
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import os
 
 IS_HPC = False
-USE_REAL_EPHEMERIS = False
+USE_REAL_EPHEMERIS = True
 USE_EINSTEIN_TOOLKIT = False
 USE_POST_NEWTONIAN = True
 
@@ -92,14 +56,14 @@ except ImportError:
 
 class RealEphemerisData:
     def __init__(self, use_spice=False):
-        self.use_spice = use_spice and SPICE_AVAILABLE
-        self.use_astropy = ASTROPY_AVAILABLE and not self.use_spice
+        self.use_astropy = ASTROPY_AVAILABLE
+        self.use_spice = use_spice and SPICE_AVAILABLE and not self.use_astropy
         
-        if self.use_spice:
-            print("Initializing SPICE ephemeris system (JPL DE440)")
-        elif self.use_astropy:
-            print("Initializing Astropy ephemeris system")
+        if self.use_astropy:
+            print("✓ Using Astropy ephemeris system (built-in ephemeris)")
             solar_system_ephemeris.set('builtin')
+        elif self.use_spice:
+            print("✓ Using SPICE ephemeris system (JPL DE440)")
         else:
             print("Using analytical Keplerian orbits (no real ephemeris)")
     
@@ -332,6 +296,8 @@ class SolarSystemData:
         }
         
     def initialize_orbits(self, t=0):
+        real_ephemeris_success = False
+        
         if self.use_real_ephemeris and self.ephemeris is not None:
             real_states = self.ephemeris.get_planetary_states(t)
             
@@ -341,7 +307,10 @@ class SolarSystemData:
                         self.bodies[name]['position'] = state['position']
                         self.bodies[name]['velocity'] = state['velocity']
                         self.bodies[name]['from_real_ephemeris'] = True
-                return
+                        real_ephemeris_success = True
+                
+                if real_ephemeris_success:
+                    return
         
         for name, body in self.bodies.items():
             if name == 'Sun':
@@ -2039,22 +2008,6 @@ class ProperBSSNEvolution:
         plt.close()
 
 def main():
-    """
-    Main simulation driver with memory-optimized parameters.
-    
-    Memory usage scales as: DOFs × num_vars × RK4_stages × 8 bytes
-    Current settings (~1000 cells, order 2, RK4): ~1-2 GB
-    
-    For higher resolution/order, adjust:
-    - mesh_resolution: 10 (low), 15 (medium), 20+ (high, needs 8+ GB)
-    - element_order: 1 (linear), 2 (quadratic), 3-4 (high-order, needs 16+ GB)
-    - time_integrator: 'Euler' (1x memory) or 'RK4' (4x memory)
-    
-    Advanced options:
-    - use_full_tensor_evolution: Enable full nonlinear tensor evolution (slower, more accurate)
-    - use_real_ephemeris: Use JPL/Astropy ephemeris data (requires SPICE or Astropy)
-    - is_hpc: Enable HPC-specific optimizations (for cluster deployment)
-    """
     if not DOLFINX_AVAILABLE:
         print("ERROR: FEniCSx is required")
         return
