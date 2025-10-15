@@ -24,7 +24,7 @@
 	"workspaceFolder": "/workspace",
 	"workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
 	
-	"postCreateCommand": "pip install matplotlib numpy scipy astropy paraview-connect && pip install -r requirements.txt",
+	"postCreateCommand": "pip install matplotlib numpy scipy astropy paraview-connect spiceypy && pip install -r requirements.txt",
 	
 	"remoteUser": "root"
 }
