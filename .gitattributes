@@ -19,3 +19,4 @@ solar_system_simulations/advanced_bssn/outputs/solar_system_advanced/data/vtx/we
 solar_system_simulations/post_newtonian/outputs/solar_system/data/vtx/gravitational_field.bp/data.0 filter=lfs diff=lfs merge=lfs -text
 solar_system_simulations/post_newtonian/outputs/solar_system/data/vtx/metric_perturbation.bp/data.0 filter=lfs diff=lfs merge=lfs -text
 solar_system_simulations/post_newtonian/outputs/solar_system/data/vtx/ricci_curvature.bp/data.0 filter=lfs diff=lfs merge=lfs -text
+data/spice_kernels/de440.bsp.1 filter=lfs diff=lfs merge=lfs -text
