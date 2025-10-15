@@ -168,11 +168,11 @@ For full general relativistic simulations, see the proper BSSN implementation in
 
 ```
 outputs/
- data/
-    vtx/          # Time series data (BP format)
-    xdmf/         # Static snapshots (XDMF format)
- visualizations/
-     plots/        # PNG visualizations
-     paraview/     # ParaView helper scripts
+├── data/
+│   ├── vtx/          # Time series data (BP format)
+│   └── xdmf/         # Static snapshots (XDMF format)
+└── visualizations/
+    ├── plots/        # PNG visualizations
+    └── paraview/     # ParaView helper scripts
 ```
 
