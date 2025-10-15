@@ -211,9 +211,9 @@ These codes represent decades of development and extensive testing.
 
 ```
 outputs/
- data/
-    vtx/              # BSSN variable time series
- plots/                # Trajectory visualizations
+├── data/
+│   └── vtx/              # BSSN variable time series
+└── plots/                # Trajectory visualizations
 ```
 
 ---

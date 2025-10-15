@@ -161,9 +161,9 @@ For more rigorous implementations, see the BSSN formulation simulations.
 
 ```
 outputs/
- data/
-    vtx/              # Time series VTX data
- plots/                # Static PNG plots
- [auto-generated ParaView scripts]
+├── data/
+│   └── vtx/              # Time series VTX data
+├── plots/                # Static PNG plots
+└── [auto-generated ParaView scripts]
 ```
 

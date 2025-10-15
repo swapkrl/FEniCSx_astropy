@@ -544,18 +544,18 @@ Use established codes:
 
 ```
 outputs/
- data/
-    vtx/              # BSSN variable time series (BP4 format)
-        phi.bp        # Conformal factor
-        lapse.bp      # Lapse function
-        trace_K.bp    # Trace K
-        shift.bp      # Shift vector
-        shift_driver.bp  # Driver field
- plots/                # Diagnostic visualizations
-     constraint_violations.png
-     gauge_evolution.png
-     amr_statistics.png
-     conservation_laws.png
+├── data/
+│   └── vtx/              # BSSN variable time series (BP4 format)
+│       ├── phi.bp        # Conformal factor
+│       ├── lapse.bp      # Lapse function
+│       ├── trace_K.bp    # Trace K
+│       ├── shift.bp      # Shift vector
+│       └── shift_driver.bp  # Driver field
+└── plots/                # Diagnostic visualizations
+    ├── constraint_violations.png
+    ├── gauge_evolution.png
+    ├── amr_statistics.png
+    └── conservation_laws.png
 ```
 
 ## Validation & Testing
