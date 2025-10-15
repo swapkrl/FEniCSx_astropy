@@ -1,34 +1,3 @@
-"""
-GRAVITATIONAL SIMULATION FRAMEWORK - PROPER SEPARATION OF PHYSICS REGIMES
-
-This module provides TWO DISTINCT frameworks:
-
-1. SolarSystemPostNewtonian (RECOMMENDED FOR SOLAR SYSTEM)
-   - Pure Post-Newtonian evolution (0PN + 1PN + 2PN)
-   - Appropriate for weak gravitational fields (solar system, exoplanets)
-   - Self-consistent PN equations of motion
-   - RK4 time integration
-   - No unnecessary BSSN complexity
-   
-   SOLAR SYSTEM SPECIFIC EFFECTS (IAU/JPL DE440 Standard):
-   - Solar mass loss: -6.3e-14 M☉/year (stellar wind)
-   - Solar oblateness: J2 = 2.1e-7, J4 = -2.5e-9
-   - Solar radiation pressure
-   - Relativistic precession (crucial for Mercury: 43"/century)
-   - Frame dragging (Lense-Thirring effect)
-   - Shapiro delay (gravitational time delay)
-
-2. CompactBinaryBSSN (FOR STRONG FIELDS ONLY)
-   - Full BSSN formulation for spacetime evolution
-   - Designed for black hole mergers, neutron star collisions
-   - Overkill for solar system applications
-   - Uses FEniCSx for finite element discretization
-
-USAGE:
-   python solar_system_proper_bssn.py pn    # Pure Post-Newtonian (default)
-   python solar_system_proper_bssn.py bssn  # BSSN for compact binaries
-"""
-
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
