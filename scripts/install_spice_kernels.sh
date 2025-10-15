@@ -20,7 +20,7 @@ wget -q --show-progress https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/n
     echo "Error: Failed to download naif0012.tls"
     exit 1
 }
-echo "✓ Downloaded naif0012.tls"
+echo " Downloaded naif0012.tls"
 
 echo ""
 echo "[2/3] Downloading planetary constants kernel (pck00010.tpc)..."
@@ -28,7 +28,7 @@ wget -q --show-progress https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/p
     echo "Error: Failed to download pck00010.tpc"
     exit 1
 }
-echo "✓ Downloaded pck00010.tpc"
+echo " Downloaded pck00010.tpc"
 
 echo ""
 echo "[3/3] Downloading DE440 planetary ephemeris (de440.bsp - 114 MB)..."
@@ -37,7 +37,7 @@ wget --show-progress https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/plan
     echo "Error: Failed to download de440.bsp"
     exit 1
 }
-echo "✓ Downloaded de440.bsp"
+echo " Downloaded de440.bsp"
 
 echo ""
 echo "================================================"

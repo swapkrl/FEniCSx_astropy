@@ -16,28 +16,29 @@ This project provides a suite of progressively complex gravitational simulations
 
 ```
 .
-├── blackhole_simulations/
-│   └── schwarzschild_field/       # Time-evolving Schwarzschild gravitational field
-│       ├── blackhole_simulation.py
-│       ├── paraview_setup.py
-│       ├── README.md
-│       └── outputs/
-├── solar_system_simulations/
-│   ├── post_newtonian/            # Post-Newtonian solar system dynamics
-│   │   ├── solar_system_spacetime.py
-│   │   ├── README.md
-│   │   └── outputs/
-│   ├── advanced_bssn/             # BSSN concepts demonstration
-│   │   ├── solar_system_advanced.py
-│   │   ├── README.md
-│   │   └── outputs/
-│   └── proper_bssn/               # Proper BSSN time evolution
-│       ├── solar_system_proper_bssn.py
-│       ├── README.md
-│       └── outputs/
-├── .gitattributes                 # Git LFS configuration
-├── .gitignore
-└── README.md                      # This file
+ blackhole_simulations/
+    schwarzschild_field/       # Time-evolving Schwarzschild gravitational field
+        blackhole_simulation.py
+        paraview_setup.py
+        README.md
+        outputs/
+ solar_system_simulations/
+    post_newtonian/            # Post-Newtonian solar system dynamics
+       solar_system_spacetime.py
+       README.md
+       outputs/
+    advanced_bssn/             # BSSN concepts demonstration
+       solar_system_advanced.py
+       README.md
+       outputs/
+    proper_bssn/               # Proper BSSN time evolution
+        solar_system_proper_bssn.py
+        solar_system_proper_bssn_2.py
+        README.md
+        outputs/
+ .gitattributes                 # Git LFS configuration
+ .gitignore
+ README.md                      # This file
 ```
 
 ## Simulations
@@ -118,7 +119,7 @@ python3 solar_system_advanced.py
 A production-ready BSSN implementation with advanced features bridging educational and research-grade numerical relativity.
 
 **Core Features**:
--  Full BSSN evolution: φ, K, α, β^i, B^i (optionally: γ̃ᵢⱼ, Ãᵢⱼ)
+-  Full BSSN evolution: φ, K, α, β^i, B^i (optionally: γ̃ᵢ, Ãᵢ)
 -  Gamma-driver shift condition with full evolution
 -  Z4c-style constraint damping (κ₁=0.02, κ₂=0.1)
 -  4th-order Runge-Kutta (RK4) time integration

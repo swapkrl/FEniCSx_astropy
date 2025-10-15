@@ -8,7 +8,7 @@ This simulation implements **production-ready BSSN evolution equations** with pr
 
 ## What's Actually Implemented
 
-### ✓ Core BSSN Evolution Equations
+###  Core BSSN Evolution Equations
 
 **Conformal Factor φ** (with RK4 time integration):
 ```
@@ -25,17 +25,17 @@ This simulation implements **production-ready BSSN evolution equations** with pr
 ∂_t α = -2 α K + β^i ∂_i α
 ```
 
-**Full Conformal Metric Tensor γ̃ᵢⱼ** (optional):
+**Full Conformal Metric Tensor γ̃ᵢ** (optional):
 ```
-∂_t γ̃ᵢⱼ = -2αÃᵢⱼ + β^k ∂_k γ̃ᵢⱼ + γ̃ᵢₖ ∂_j β^k + γ̃ₖⱼ ∂_i β^k - (2/3)γ̃ᵢⱼ ∂_k β^k
-```
-
-**Full Conformal Extrinsic Curvature Ãᵢⱼ** (optional):
-```
-∂_t Ãᵢⱼ = e^(-4φ)(-DᵢDⱼα + αRᵢⱼ) + α(KÃᵢⱼ - 2ÃᵢₖÃ^k_j) + ...
+∂_t γ̃ᵢ = -2αÃᵢ + β^k ∂_k γ̃ᵢ + γ̃ᵢₖ ∂_j β^k + γ̃ₖ ∂_i β^k - (2/3)γ̃ᵢ ∂_k β^k
 ```
 
-### ✓ Advanced Gauge Conditions
+**Full Conformal Extrinsic Curvature Ãᵢ** (optional):
+```
+∂_t Ãᵢ = e^(-4φ)(-DᵢDα + αRᵢ) + α(KÃᵢ - 2ÃᵢₖÃ^k_j) + ...
+```
+
+###  Advanced Gauge Conditions
 
 **Gamma-Driver Shift Evolution**:
 ```
@@ -51,16 +51,16 @@ This simulation implements **production-ready BSSN evolution equations** with pr
 - Bounded to [0.1, 10.0] for numerical stability
 - Coupled to trace K for slice evolution control
 
-### ✓ Constraint Enforcement & Damping
+###  Constraint Enforcement & Damping
 
 **Hamiltonian Constraint** (properly computed):
 ```
-H = R + K² - ÃᵢⱼÃ^ij - 16π ρ
+H = R + K² - ÃᵢÃ^ij - 16π ρ
 ```
 
 **Momentum Constraints**:
 ```
-Mᵢ = DⱼÃ^ij - (2/3)∂ᵢK - 8π jᵢ
+Mᵢ = DÃ^ij - (2/3)∂ᵢK - 8π jᵢ
 ```
 
 **Z4c-Style Constraint Damping**:
@@ -69,7 +69,7 @@ Mᵢ = DⱼÃ^ij - (2/3)∂ᵢK - 8π jᵢ
 - Prevents exponential growth of constraint violations
 - Applied to evolution equations for φ and K
 
-### ✓ Adaptive Mesh Refinement (AMR)
+###  Adaptive Mesh Refinement (AMR)
 
 **Multi-Level Mesh Hierarchy**:
 - Error-based refinement criteria
@@ -88,7 +88,7 @@ Mᵢ = DⱼÃ^ij - (2/3)∂ᵢK - 8π jᵢ
 - Automatic threshold adaptation based on error distribution
 - Refinement percentage tracking and reporting
 
-### ✓ High-Order Discretization
+###  High-Order Discretization
 
 **Spatial Discretization**:
 - Continuous Galerkin (CG) or Discontinuous Galerkin (DG) elements
@@ -100,7 +100,7 @@ Mᵢ = DⱼÃ^ij - (2/3)∂ᵢK - 8π jᵢ
 - Euler method available for memory-constrained systems
 - Full multi-stage integration for φ, K, and α
 
-### ✓ Real Astrophysical Data Integration
+###  Real Astrophysical Data Integration
 
 **JPL Ephemeris Data** (optional):
 - SPICE toolkit integration for JPL DE440 ephemeris
@@ -114,7 +114,7 @@ Mᵢ = DⱼÃ^ij - (2/3)∂ᵢK - 8π jᵢ
 - Applied to density and Lorentz factors
 - Enhances relativistic accuracy beyond weak-field
 
-### ✓ Production-Grade Diagnostics
+###  Production-Grade Diagnostics
 
 **Constraint Monitoring**:
 - Real-time Hamiltonian and momentum constraint tracking
@@ -140,7 +140,7 @@ Mᵢ = DⱼÃ^ij - (2/3)∂ᵢK - 8π jᵢ
 - Surface integral of conformal factor gradient
 - Total system mass from spacetime geometry
 
-### ✓ HPC & Parallel Computing Support
+###  HPC & Parallel Computing Support
 
 **MPI-Based Parallelization**:
 - Domain decomposition across MPI ranks
@@ -160,7 +160,7 @@ Mᵢ = DⱼÃ^ij - (2/3)∂ᵢK - 8π jᵢ
 - Barrier synchronization for time stepping
 - Prepared for cluster deployment
 
-### ✓ Stress-Energy Tensor
+###  Stress-Energy Tensor
 
 Proper relativistic matter coupling with enhancements:
 ```
@@ -210,7 +210,7 @@ time_integrator = 'RK4'         # 'Euler' or 'RK4'
 ### Advanced Options
 
 ```python
-use_full_tensor_evolution = False    # Enable γ̃ᵢⱼ and Ãᵢⱼ evolution
+use_full_tensor_evolution = False    # Enable γ̃ᵢ and Ãᵢ evolution
 use_post_newtonian = True            # Apply PN corrections
 use_real_ephemeris = False           # Use real planetary data
 is_hpc = False                       # Enable HPC mode
@@ -251,21 +251,21 @@ Memory usage scales as: `DOFs × num_vars × RK4_stages × 8 bytes`
 
 | Feature | Basic BSSN | Previous | Production BSSN (This) |
 |---------|-----------|----------|------------------------|
-| φ Evolution | ❌ Static | ✓ Euler | ✓ RK4 |
-| K Evolution | ❌ None | ✓ Basic | ✓ Full with sources |
-| α Evolution | ❌ Static | ✓ 1+log | ✓ 1+log + RK4 |
-| β^i Evolution | ❌ None | ❌ Zero shift | ✓ Gamma-driver |
-| γ̃ᵢⱼ Evolution | ❌ None | ❌ Static | ✓ Full tensor (optional) |
-| Ãᵢⱼ Evolution | ❌ None | ❌ Static | ✓ Full tensor (optional) |
-| Constraints | ❌ None | ✓ Monitored | ✓ Computed + Damped |
-| AMR | ❌ None | ❌ None | ✓ Multi-level hierarchy |
-| Element Order | ⚠️ P1 only | ⚠️ P1 only | ✓ P1-P4 configurable |
-| Time Integration | ❌ Euler | ⚠️ Euler | ✓ RK4 |
-| Matter Coupling | ⚠️ Basic | ⚠️ Simplified | ✓ Lorentz + PN |
-| Real Ephemeris | ❌ None | ❌ None | ✓ JPL/Astropy |
-| Diagnostics | ❌ None | ⚠️ Basic | ✓ Production-grade |
-| HPC Support | ❌ None | ❌ None | ✓ MPI-ready |
-| Gauge Damping | ❌ None | ❌ None | ✓ Z4c-style |
+| φ Evolution |  Static |  Euler |  RK4 |
+| K Evolution |  None |  Basic |  Full with sources |
+| α Evolution |  Static |  1+log |  1+log + RK4 |
+| β^i Evolution |  None |  Zero shift |  Gamma-driver |
+| γ̃ᵢ Evolution |  None |  Static |  Full tensor (optional) |
+| Ãᵢ Evolution |  None |  Static |  Full tensor (optional) |
+| Constraints |  None |  Monitored |  Computed + Damped |
+| AMR |  None |  None |  Multi-level hierarchy |
+| Element Order |  P1 only |  P1 only |  P1-P4 configurable |
+| Time Integration |  Euler |  Euler |  RK4 |
+| Matter Coupling |  Basic |  Simplified |  Lorentz + PN |
+| Real Ephemeris |  None |  None |  JPL/Astropy |
+| Diagnostics |  None |  Basic |  Production-grade |
+| HPC Support |  None |  None |  MPI-ready |
+| Gauge Damping |  None |  None |  Z4c-style |
 
 ### Production-Level Advances
 
@@ -422,23 +422,23 @@ mpirun -n 16 python3 solar_system_proper_bssn.py
 
 ### What This Code IS
 
-- ✓ Production-ready BSSN evolution framework
-- ✓ Proper constraint computation and damping
-- ✓ Adaptive mesh refinement infrastructure
-- ✓ High-order spatial and temporal discretization
-- ✓ Real astrophysical data integration
-- ✓ HPC-ready with MPI support
-- ✓ Comprehensive diagnostics and monitoring
-- ✓ Educational AND research preparation tool
-- ✓ Bridge to Einstein Toolkit integration
+-  Production-ready BSSN evolution framework
+-  Proper constraint computation and damping
+-  Adaptive mesh refinement infrastructure
+-  High-order spatial and temporal discretization
+-  Real astrophysical data integration
+-  HPC-ready with MPI support
+-  Comprehensive diagnostics and monitoring
+-  Educational AND research preparation tool
+-  Bridge to Einstein Toolkit integration
 
 ### What This Code IS NOT
 
-- ❌ Complete 25-variable BSSN implementation
-- ❌ Binary black hole merger simulator
-- ❌ Strong-field regime validated (yet)
-- ❌ Replacement for Einstein Toolkit
-- ❌ Publication-ready without further validation
+-  Complete 25-variable BSSN implementation
+-  Binary black hole merger simulator
+-  Strong-field regime validated (yet)
+-  Replacement for Einstein Toolkit
+-  Publication-ready without further validation
 
 ## For Learning BSSN
 
@@ -499,7 +499,7 @@ Use established codes:
 ## Technical Specifications
 
 ### Core Evolution System
-- **Variables Evolved**: φ, K, α, β^i, B^i (optionally: γ̃ᵢⱼ, Ãᵢⱼ)
+- **Variables Evolved**: φ, K, α, β^i, B^i (optionally: γ̃ᵢ, Ãᵢ)
 - **Total DOFs**: Depends on mesh and element order (e.g., 10³ cells × P2 elements ≈ 8000 DOFs/var)
 - **Gauge Conditions**: 
   - 1+log slicing for lapse
@@ -544,18 +544,18 @@ Use established codes:
 
 ```
 outputs/
-├── data/
-│   └── vtx/              # BSSN variable time series (BP4 format)
-│       ├── phi.bp        # Conformal factor
-│       ├── lapse.bp      # Lapse function
-│       ├── trace_K.bp    # Trace K
-│       ├── shift.bp      # Shift vector
-│       └── shift_driver.bp  # Driver field
-└── plots/                # Diagnostic visualizations
-    ├── constraint_violations.png
-    ├── gauge_evolution.png
-    ├── amr_statistics.png
-    └── conservation_laws.png
+ data/
+    vtx/              # BSSN variable time series (BP4 format)
+        phi.bp        # Conformal factor
+        lapse.bp      # Lapse function
+        trace_K.bp    # Trace K
+        shift.bp      # Shift vector
+        shift_driver.bp  # Driver field
+ plots/                # Diagnostic visualizations
+     constraint_violations.png
+     gauge_evolution.png
+     amr_statistics.png
+     conservation_laws.png
 ```
 
 ## Validation & Testing

@@ -86,7 +86,7 @@ where Φ is the Newtonian potential with corrections:
 
 **Mercury's Perihelion Precession**:  
 Predicted: 43 arcseconds per century beyond Newtonian  
-Observed: 43.1 ± 0.5 arcsec/century ✓
+Observed: 43.1 ± 0.5 arcsec/century Yes
 
 **Gravitational Time Dilation**:
 Clocks run slower near massive bodies by factor:
@@ -161,9 +161,9 @@ For more rigorous implementations, see the BSSN formulation simulations.
 
 ```
 outputs/
-├── data/
-│   └── vtx/              # Time series VTX data
-├── plots/                # Static PNG plots
-└── [auto-generated ParaView scripts]
+ data/
+    vtx/              # Time series VTX data
+ plots/                # Static PNG plots
+ [auto-generated ParaView scripts]
 ```
 

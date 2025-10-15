@@ -60,10 +60,10 @@ class RealEphemerisData:
         self.use_spice = use_spice and SPICE_AVAILABLE and not self.use_astropy
         
         if self.use_astropy:
-            print("✓ Using Astropy ephemeris system (built-in ephemeris)")
+            print(" Using Astropy ephemeris system (built-in ephemeris)")
             solar_system_ephemeris.set('builtin')
         elif self.use_spice:
-            print("✓ Using SPICE ephemeris system (JPL DE440)")
+            print(" Using SPICE ephemeris system (JPL DE440)")
         else:
             print("Using analytical Keplerian orbits (no real ephemeris)")
     
@@ -576,7 +576,7 @@ class SolarSystemPostNewtonian:
         Following IAU standards and JPL DE440 methodology
         
         Implements all solar system specific effects:
-        - Solar mass loss (stellar wind): -6.3e-14 M☉/year
+        - Solar mass loss (stellar wind): -6.3e-14 M/year
         - Solar oblateness (J2, J4 multipoles)
         - Solar radiation pressure
         - Relativistic precession (Mercury: 43"/century)
@@ -902,7 +902,7 @@ class CompactBinaryBSSN:
         if is_hpc:
             print("   HPC mode: Optimized for cluster deployment")
         if self.use_full_tensor_evolution:
-            print("   Full nonlinear tensor evolution (γ̃ᵢⱼ, Ãᵢⱼ)")
+            print("   Full nonlinear tensor evolution (γ̃ᵢ, Ãᵢ)")
         print("\nMethodology:")
         print("    BSSN for strong-field spacetime evolution")
         print("    Full Einstein equations in BSSN formulation")
@@ -957,7 +957,7 @@ class CompactBinaryBSSN:
         print(f"  Estimated memory usage: ~{estimated_memory_gb:.2f} GB")
         
         if estimated_memory_gb > 4.0:
-            print(f"  ⚠️  WARNING: High memory usage detected!")
+            print(f"    WARNING: High memory usage detected!")
             print(f"  Consider reducing mesh_resolution or element_order")
         
         return V_scalar, V_vector, V_tensor
@@ -2485,7 +2485,7 @@ def main_pn_solar_system():
     print("\nSolar System Physics (IAU/JPL DE440 Standard):")
     print(f"  Advanced effects: {'ENABLED' if pn_sim.enable_all_effects else 'DISABLED (validation required)'}")
     if pn_sim.enable_all_effects:
-        print(f"  Solar mass loss: {pn_sim.solar_effects['solar_mass_loss']:.2e} M☉/year")
+        print(f"  Solar mass loss: {pn_sim.solar_effects['solar_mass_loss']:.2e} M/year")
         print(f"  Solar J2 (oblateness): {pn_sim.solar_effects['solar_j2']:.2e}")
         print(f"  Solar J4: {pn_sim.solar_effects['solar_j4']:.2e}")
         print(f"  Radiation pressure: {'Enabled' if pn_sim.solar_effects['radiation_pressure'] else 'Disabled'}")
@@ -2560,12 +2560,12 @@ def main_pn_solar_system():
     
     if pn_sim.enable_all_effects:
         print("\nSolar system effects included:")
-        print("   ✓ Solar oblateness (J2, J4 multipoles)")
-        print("   ✓ Solar radiation pressure")
-        print("   ✓ Relativistic precession (Mercury)")
-        print("   ✓ Frame dragging (Lense-Thirring)")
-        print("   ✓ Shapiro delay (light-time effects)")
-        print("   ✓ Solar mass loss")
+        print("    Solar oblateness (J2, J4 multipoles)")
+        print("    Solar radiation pressure")
+        print("    Relativistic precession (Mercury)")
+        print("    Frame dragging (Lense-Thirring)")
+        print("    Shapiro delay (light-time effects)")
+        print("    Solar mass loss")
         print("\n   Following IAU standards and JPL DE440 methodology")
     else:
         print("\nSolar system effects available (require validation):")
@@ -2574,7 +2574,7 @@ def main_pn_solar_system():
         print("   • Relativistic precession (Mercury: 43\"/century)")
         print("   • Frame dragging (Lense-Thirring effect)")
         print("   • Shapiro delay (light-time effects)")
-        print("   • Solar mass loss (-6.3e-14 M☉/year)")
+        print("   • Solar mass loss (-6.3e-14 M/year)")
         print("\n   Set enable_all_effects=True to activate")
     
     print("=" * 70)

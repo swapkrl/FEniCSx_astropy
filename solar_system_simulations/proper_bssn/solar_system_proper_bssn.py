@@ -60,10 +60,10 @@ class RealEphemerisData:
         self.use_spice = use_spice and SPICE_AVAILABLE and not self.use_astropy
         
         if self.use_astropy:
-            print("✓ Using Astropy ephemeris system (built-in ephemeris)")
+            print(" Using Astropy ephemeris system (built-in ephemeris)")
             solar_system_ephemeris.set('builtin')
         elif self.use_spice:
-            print("✓ Using SPICE ephemeris system (JPL DE440)")
+            print(" Using SPICE ephemeris system (JPL DE440)")
         else:
             print("Using analytical Keplerian orbits (no real ephemeris)")
     
@@ -521,7 +521,7 @@ class ProperBSSNEvolution:
         if is_hpc:
             print("   HPC mode: Optimized for cluster deployment")
         if self.use_full_tensor_evolution:
-            print("   Full nonlinear tensor evolution (γ̃ᵢⱼ, Ãᵢⱼ)")
+            print("   Full nonlinear tensor evolution (γ̃ᵢ, Ãᵢ)")
         print("\nMethodology:")
         print("    BSSN for spacetime evolution (weak-field regime)")
         print("    Post-Newtonian matter dynamics (appropriate for solar system)")
@@ -576,7 +576,7 @@ class ProperBSSNEvolution:
         print(f"  Estimated memory usage: ~{estimated_memory_gb:.2f} GB")
         
         if estimated_memory_gb > 4.0:
-            print(f"  ⚠️  WARNING: High memory usage detected!")
+            print(f"    WARNING: High memory usage detected!")
             print(f"  Consider reducing mesh_resolution or element_order")
         
         return V_scalar, V_vector, V_tensor
@@ -2177,10 +2177,10 @@ def main():
         print("   Self-consistent PN evolution equations")
         print("   No weak-field approximation contradictions")
     if sim.use_full_tensor_evolution:
-        print("   Full nonlinear γ̃ᵢⱼ and Ãᵢⱼ tensor evolution")
+        print("   Full nonlinear γ̃ᵢ and Ãᵢ tensor evolution")
         print("   Ricci tensor computation from conformal metric")
-    print("   Proper Hamiltonian constraint: H = R + K² - ÃᵢⱼÃⁱʲ - 16πρ")
-    print("   Proper momentum constraint: Mᵢ = DⱼÃⁱʲ - (2/3)∂ᵢK")
+    print("   Proper Hamiltonian constraint: H = R + K² - ÃᵢÃⁱʲ - 16πρ")
+    print("   Proper momentum constraint: Mᵢ = DÃⁱʲ - (2/3)∂ᵢK")
     if sim.is_hpc:
         print(f"   HPC deployment: {sim.hpc_manager.size} MPI ranks")
         print("   MPI-based domain decomposition and load balancing")
