@@ -38,32 +38,59 @@ self.use_spice = use_spice and SPICE_AVAILABLE
 
 ## Einstein Toolkit Integration
 
-**Build Time**: 2-4 hours  
-**Disk Space**: ~3 GB  
+**Status**: Framework ready, full installation optional  
 **Complexity**: Advanced
 
-```bash
-# Run the installation script
-./scripts/install_einstein_toolkit.sh
-```
+### Option 1: Use the Existing Framework  (Recommended)
 
-**What gets installed:**
-- Full Einstein Toolkit framework
-- Cactus computational toolkit
-- Carpet AMR infrastructure
-- Production-grade thorns (modules)
+The `EinsteinToolkitInterface` class is already implemented and ready!
+No installation needed.
 
-**Features provided:**
-- Industrial-strength AMR
-- Validated constraint enforcement
-- Gravitational waveform extraction
-- Binary black hole capabilities
-
-After installation:
 ```python
-# In solar_system_proper_bssn.py
-USE_EINSTEIN_TOOLKIT = True
+# Already available in solar_system_proper_bssn.py
+USE_EINSTEIN_TOOLKIT = False  # Framework is ready when needed
 ```
+
+### Option 2: Docker Image  (Best for Full ET)
+
+```bash
+# Pull the official Einstein Toolkit image
+docker pull einsteintoolkit/toolkit:latest
+
+# Run with your workspace mounted
+docker run -it -v $(pwd):/work einsteintoolkit/toolkit:latest
+```
+
+### Option 3: Minimal Test Environment 
+
+```bash
+# Create basic directory structure for testing
+./scripts/install_einstein_toolkit_simple.sh
+```
+
+Creates a minimal framework for testing the interface without compilation.
+
+### Option 4: Full Compilation  (Advanced Users)
+
+**Note**: The full compilation is complex due to changing ET repositories.
+
+**Requirements**:
+- Build Time: 2-4 hours  
+- Disk Space: ~3 GB  
+- Dependencies: gcc, gfortran, MPI, HDF5, etc.
+
+For production ET work, we recommend:
+1. Using a pre-configured cluster with ET installed
+2. The official Docker image
+3. Contacting the Einstein Toolkit community for the latest build instructions
+
+### What the Framework Provides
+
+The existing `EinsteinToolkitInterface` class in your simulation provides:
+-  Cactus thorn configuration (ADMBase, HydroBase, TmunuBase, Carpet)
+-  Data exchange structure (FEniCS ↔ Cactus)
+-  Field conversion methods
+-  Ready for coupling when ET is available
 
 ## Quick Start Guide
 
