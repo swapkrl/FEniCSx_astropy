@@ -6,6 +6,17 @@ A rigorous implementation of BSSN (Baumgarte-Shapiro-Shibata-Nakamura) formulati
 
 This simulation implements **production-ready BSSN evolution equations** with proper time evolution, constraint monitoring and damping, adaptive mesh refinement, real astrophysical data integration, and support for HPC cluster deployment. It bridges the gap between educational implementations and research-grade numerical relativity codes.
 
+### New: Comprehensive Visualization Suite
+
+The simulation now includes **extensive visualization capabilities** for both planetary motion and spacetime curvature evolution:
+- **3D & 2D trajectory plots** showing planetary orbits over time
+- **Animated GIF outputs** of solar system evolution (100 frames, 10 fps)
+- **Spacetime curvature heatmaps** showing φ, α, K evolution
+- **Field snapshots** at multiple time points
+- **Animated spacetime evolution** showing curved spacetime dynamics
+
+All visualizations are automatically generated during post-processing. See [VISUALIZATION_GUIDE.md](VISUALIZATION_GUIDE.md) for detailed documentation.
+
 ## What's Actually Implemented
 
 ###  Core BSSN Evolution Equations
@@ -244,6 +255,16 @@ Memory usage scales as: `DOFs × num_vars × RK4_stages × 8 bytes`
 - `gauge_evolution.png` - Shift vector and driver field norms
 - `amr_statistics.png` - AMR refinement activity
 - `conservation_laws.png` - Energy/mass conservation and GW strain
+
+### Solar System Visualizations (outputs/plots/) **NEW**
+- `planetary_trajectories_3d.png` - 3D view of all planetary orbits
+- `planetary_trajectories_2d.png` - Multi-view (XY, XZ, YZ planes + radius vs time)
+- `solar_system_evolution.gif` - **Animated 3D solar system evolution** (100 frames)
+
+### Spacetime Curvature Visualizations (outputs/plots/) **NEW**
+- `spacetime_curvature_evolution.png` - Heatmap of φ, α, K evolution over time
+- `spacetime_snapshots.png` - Field profiles at 4 key time points
+- `spacetime_curvature_evolution.gif` - **Animated spacetime field evolution**
 
 ## Key Improvements
 

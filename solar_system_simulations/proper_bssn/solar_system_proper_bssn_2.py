@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.animation import FuncAnimation, PillowWriter
+from matplotlib import cm
 import os
 
 IS_HPC = False
@@ -2098,6 +2100,13 @@ class CompactBinaryBSSN:
         constraint_violations = {'H': [], 'M': []}
         amr_statistics = {'refinements': [], 'error_estimates': []}
         gauge_data = {'times': [], 'beta_norms': [], 'B_norms': []}
+        spacetime_history = {
+            'times': [],
+            'phi_samples': [],
+            'alpha_samples': [],
+            'K_samples': [],
+            'sample_points': None
+        }
         
         for step in range(self.time_steps):
             current_time = (step + 1) * self.dt
@@ -2269,6 +2278,22 @@ class CompactBinaryBSSN:
                 planetary_trajectories[name].append(body['position'].copy())
             time_array.append(time_years)
             
+            if step == 0:
+                n_samples = 50
+                sample_coords = np.linspace(-self.domain_size, self.domain_size, n_samples)
+                xx, yy = np.meshgrid(sample_coords, sample_coords)
+                spacetime_history['sample_points'] = (xx, yy)
+            
+            if (step + 1) % max(1, self.time_steps // 20) == 0:
+                phi_array = bssn_vars['phi'].x.array[:]
+                alpha_array = bssn_vars['alpha'].x.array[:]
+                K_array = bssn_vars['K'].x.array[:]
+                
+                spacetime_history['times'].append(time_years)
+                spacetime_history['phi_samples'].append(phi_array[:100].copy())
+                spacetime_history['alpha_samples'].append(alpha_array[:100].copy())
+                spacetime_history['K_samples'].append(K_array[:100].copy())
+            
             if (step + 1) % max(1, self.time_steps // 10) == 0:
                 print(f"\n  Step {step+1}/{self.time_steps}, t={time_years:.2f} years")
                 print(f"    φ range: [{np.min(bssn_vars['phi'].x.array):.2e}, {np.max(bssn_vars['phi'].x.array):.2e}]")
@@ -2338,7 +2363,7 @@ class CompactBinaryBSSN:
             adm_mass = self.compute_adm_mass(domain, V_scalar, bssn_vars)
             print(f"  Final ADM mass: {adm_mass:.2e} kg")
         
-        return planetary_trajectories, time_array, constraint_violations, amr_statistics, gauge_data, self.diagnostics
+        return planetary_trajectories, time_array, constraint_violations, amr_statistics, gauge_data, self.diagnostics, spacetime_history
     
     def plot_constraint_violations(self, times, constraints):
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 10))
@@ -2468,6 +2493,339 @@ class CompactBinaryBSSN:
         plt.savefig(plot_path, dpi=150, bbox_inches='tight')
         print(f"Conservation laws plot saved to '{plot_path}'")
         plt.close()
+    
+    def plot_planetary_trajectories_3d(self, trajectories, times):
+        fig = plt.figure(figsize=(14, 12))
+        ax = fig.add_subplot(111, projection='3d')
+        
+        AU = self.solar_data.AU
+        
+        for name, positions in trajectories.items():
+            if len(positions) == 0:
+                continue
+            
+            positions_array = np.array(positions)
+            
+            x = positions_array[:, 0] / AU
+            y = positions_array[:, 1] / AU
+            z = positions_array[:, 2] / AU
+            
+            color = self.solar_data.bodies[name]['color']
+            
+            ax.plot(x, y, z, label=name, color=color, linewidth=2, alpha=0.7)
+            
+            ax.scatter(x[-1], y[-1], z[-1], color=color, s=200, marker='o', 
+                      edgecolors='black', linewidths=2, zorder=100)
+            
+            if name == 'Sun':
+                ax.scatter(x[0], y[0], z[0], color=color, s=400, marker='*', 
+                          edgecolors='orange', linewidths=2, zorder=100)
+        
+        ax.set_xlabel('X (AU)', fontsize=12, fontweight='bold')
+        ax.set_ylabel('Y (AU)', fontsize=12, fontweight='bold')
+        ax.set_zlabel('Z (AU)', fontsize=12, fontweight='bold')
+        ax.set_title(f'Solar System Trajectories ({times[-1]:.2f} years)', 
+                    fontsize=14, fontweight='bold')
+        ax.legend(loc='upper right', fontsize=10)
+        ax.grid(True, alpha=0.3)
+        
+        max_range = 6.0
+        ax.set_xlim([-max_range, max_range])
+        ax.set_ylim([-max_range, max_range])
+        ax.set_zlim([-max_range, max_range])
+        
+        plt.tight_layout()
+        plot_path = os.path.join(PROPER_BSSN_PLOTS_DIR, 'planetary_trajectories_3d.png')
+        plt.savefig(plot_path, dpi=150, bbox_inches='tight')
+        print(f"3D planetary trajectories plot saved to '{plot_path}'")
+        plt.close()
+    
+    def plot_planetary_trajectories_2d(self, trajectories, times):
+        fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(16, 14))
+        
+        AU = self.solar_data.AU
+        
+        for name, positions in trajectories.items():
+            if len(positions) == 0:
+                continue
+            
+            positions_array = np.array(positions)
+            
+            x = positions_array[:, 0] / AU
+            y = positions_array[:, 1] / AU
+            z = positions_array[:, 2] / AU
+            
+            color = self.solar_data.bodies[name]['color']
+            
+            ax1.plot(x, y, label=name, color=color, linewidth=2, alpha=0.7)
+            ax1.scatter(x[-1], y[-1], color=color, s=150, marker='o', 
+                       edgecolors='black', linewidths=2, zorder=100)
+            
+            ax2.plot(x, z, color=color, linewidth=2, alpha=0.7)
+            ax2.scatter(x[-1], z[-1], color=color, s=150, marker='o', 
+                       edgecolors='black', linewidths=2, zorder=100)
+            
+            ax3.plot(y, z, color=color, linewidth=2, alpha=0.7)
+            ax3.scatter(y[-1], z[-1], color=color, s=150, marker='o', 
+                       edgecolors='black', linewidths=2, zorder=100)
+            
+            r = np.sqrt(x**2 + y**2 + z**2)
+            time_slice = times if len(times) == len(r) else times[:len(r)]
+            ax4.plot(time_slice, r, label=name, color=color, linewidth=2)
+        
+        ax1.set_xlabel('X (AU)', fontsize=12, fontweight='bold')
+        ax1.set_ylabel('Y (AU)', fontsize=12, fontweight='bold')
+        ax1.set_title('XY Plane', fontsize=13, fontweight='bold')
+        ax1.legend(loc='upper right', fontsize=9)
+        ax1.grid(True, alpha=0.3)
+        ax1.axis('equal')
+        
+        ax2.set_xlabel('X (AU)', fontsize=12, fontweight='bold')
+        ax2.set_ylabel('Z (AU)', fontsize=12, fontweight='bold')
+        ax2.set_title('XZ Plane', fontsize=13, fontweight='bold')
+        ax2.grid(True, alpha=0.3)
+        ax2.axis('equal')
+        
+        ax3.set_xlabel('Y (AU)', fontsize=12, fontweight='bold')
+        ax3.set_ylabel('Z (AU)', fontsize=12, fontweight='bold')
+        ax3.set_title('YZ Plane', fontsize=13, fontweight='bold')
+        ax3.grid(True, alpha=0.3)
+        ax3.axis('equal')
+        
+        ax4.set_xlabel('Time (years)', fontsize=12, fontweight='bold')
+        ax4.set_ylabel('Distance from Sun (AU)', fontsize=12, fontweight='bold')
+        ax4.set_title('Orbital Radius vs Time', fontsize=13, fontweight='bold')
+        ax4.legend(loc='upper right', fontsize=9)
+        ax4.grid(True, alpha=0.3)
+        
+        plt.suptitle(f'Solar System Evolution ({times[-1]:.2f} years)', 
+                    fontsize=15, fontweight='bold', y=0.995)
+        plt.tight_layout()
+        plot_path = os.path.join(PROPER_BSSN_PLOTS_DIR, 'planetary_trajectories_2d.png')
+        plt.savefig(plot_path, dpi=150, bbox_inches='tight')
+        print(f"2D planetary trajectories plot saved to '{plot_path}'")
+        plt.close()
+    
+    def create_solar_system_animation(self, trajectories, times):
+        print("\nCreating solar system animation...")
+        
+        fig = plt.figure(figsize=(12, 10))
+        ax = fig.add_subplot(111, projection='3d')
+        
+        AU = self.solar_data.AU
+        
+        traj_arrays = {}
+        for name, positions in trajectories.items():
+            if len(positions) > 0:
+                traj_arrays[name] = np.array(positions) / AU
+        
+        def update(frame):
+            ax.clear()
+            
+            for name, positions in traj_arrays.items():
+                if frame >= len(positions):
+                    frame_idx = len(positions) - 1
+                else:
+                    frame_idx = frame
+                
+                color = self.solar_data.bodies[name]['color']
+                
+                trail_start = max(0, frame_idx - 20)
+                ax.plot(positions[trail_start:frame_idx+1, 0],
+                       positions[trail_start:frame_idx+1, 1],
+                       positions[trail_start:frame_idx+1, 2],
+                       color=color, linewidth=1, alpha=0.5)
+                
+                size = 400 if name == 'Sun' else 200
+                marker = '*' if name == 'Sun' else 'o'
+                ax.scatter(positions[frame_idx, 0],
+                          positions[frame_idx, 1],
+                          positions[frame_idx, 2],
+                          color=color, s=size, marker=marker,
+                          edgecolors='black', linewidths=2, zorder=100)
+            
+            ax.set_xlabel('X (AU)', fontsize=11, fontweight='bold')
+            ax.set_ylabel('Y (AU)', fontsize=11, fontweight='bold')
+            ax.set_zlabel('Z (AU)', fontsize=11, fontweight='bold')
+            
+            time_idx = min(frame, len(times) - 1)
+            ax.set_title(f'Solar System Evolution - t = {times[time_idx]:.3f} years',
+                        fontsize=13, fontweight='bold')
+            
+            max_range = 6.0
+            ax.set_xlim([-max_range, max_range])
+            ax.set_ylim([-max_range, max_range])
+            ax.set_zlim([-max_range, max_range])
+            ax.grid(True, alpha=0.3)
+        
+        num_frames = min(len(times), 100)
+        frame_indices = np.linspace(0, len(times) - 1, num_frames, dtype=int)
+        
+        anim = FuncAnimation(fig, update, frames=frame_indices, 
+                           interval=100, blit=False, repeat=True)
+        
+        animation_path = os.path.join(PROPER_BSSN_PLOTS_DIR, 'solar_system_evolution.gif')
+        writer = PillowWriter(fps=10)
+        anim.save(animation_path, writer=writer, dpi=100)
+        print(f"Solar system animation saved to '{animation_path}'")
+        plt.close()
+    
+    def plot_spacetime_curvature_evolution(self, spacetime_history):
+        if not spacetime_history['times']:
+            print("No spacetime history data to plot")
+            return
+        
+        fig, axes = plt.subplots(3, 1, figsize=(14, 16))
+        
+        times = spacetime_history['times']
+        
+        phi_data = np.array(spacetime_history['phi_samples'])
+        alpha_data = np.array(spacetime_history['alpha_samples'])
+        K_data = np.array(spacetime_history['K_samples'])
+        
+        im1 = axes[0].imshow(phi_data.T, aspect='auto', cmap='RdBu_r',
+                            extent=[times[0], times[-1], 0, phi_data.shape[1]],
+                            interpolation='bilinear')
+        axes[0].set_xlabel('Time (years)', fontsize=12, fontweight='bold')
+        axes[0].set_ylabel('Spatial Sample Points', fontsize=12, fontweight='bold')
+        axes[0].set_title('Conformal Factor (φ) Evolution', fontsize=13, fontweight='bold')
+        plt.colorbar(im1, ax=axes[0], label='φ')
+        
+        im2 = axes[1].imshow(alpha_data.T, aspect='auto', cmap='viridis',
+                            extent=[times[0], times[-1], 0, alpha_data.shape[1]],
+                            interpolation='bilinear')
+        axes[1].set_xlabel('Time (years)', fontsize=12, fontweight='bold')
+        axes[1].set_ylabel('Spatial Sample Points', fontsize=12, fontweight='bold')
+        axes[1].set_title('Lapse Function (α) Evolution', fontsize=13, fontweight='bold')
+        plt.colorbar(im2, ax=axes[1], label='α')
+        
+        im3 = axes[2].imshow(K_data.T, aspect='auto', cmap='seismic',
+                            extent=[times[0], times[-1], 0, K_data.shape[1]],
+                            interpolation='bilinear')
+        axes[2].set_xlabel('Time (years)', fontsize=12, fontweight='bold')
+        axes[2].set_ylabel('Spatial Sample Points', fontsize=12, fontweight='bold')
+        axes[2].set_title('Trace Extrinsic Curvature (K) Evolution', fontsize=13, fontweight='bold')
+        plt.colorbar(im3, ax=axes[2], label='K')
+        
+        plt.suptitle('Spacetime Curvature Evolution', fontsize=15, fontweight='bold', y=0.995)
+        plt.tight_layout()
+        plot_path = os.path.join(PROPER_BSSN_PLOTS_DIR, 'spacetime_curvature_evolution.png')
+        plt.savefig(plot_path, dpi=150, bbox_inches='tight')
+        print(f"Spacetime curvature evolution plot saved to '{plot_path}'")
+        plt.close()
+    
+    def plot_spacetime_snapshots(self, spacetime_history):
+        if not spacetime_history['times']:
+            print("No spacetime history data to plot")
+            return
+        
+        times = spacetime_history['times']
+        phi_data = np.array(spacetime_history['phi_samples'])
+        alpha_data = np.array(spacetime_history['alpha_samples'])
+        K_data = np.array(spacetime_history['K_samples'])
+        
+        snapshot_indices = [0, len(times)//3, 2*len(times)//3, -1]
+        
+        fig, axes = plt.subplots(4, 3, figsize=(18, 20))
+        
+        for idx, snap_idx in enumerate(snapshot_indices):
+            time_val = times[snap_idx]
+            
+            n_samples = int(np.sqrt(len(phi_data[snap_idx])))
+            phi_slice = phi_data[snap_idx][:n_samples]
+            alpha_slice = alpha_data[snap_idx][:n_samples]
+            K_slice = K_data[snap_idx][:n_samples]
+            
+            axes[idx, 0].plot(phi_slice, 'b-', linewidth=2)
+            axes[idx, 0].set_ylabel('φ', fontsize=12, fontweight='bold')
+            axes[idx, 0].set_title(f't = {time_val:.3f} years', fontsize=11, fontweight='bold')
+            axes[idx, 0].grid(True, alpha=0.3)
+            
+            axes[idx, 1].plot(alpha_slice, 'g-', linewidth=2)
+            axes[idx, 1].set_ylabel('α', fontsize=12, fontweight='bold')
+            axes[idx, 1].set_title(f't = {time_val:.3f} years', fontsize=11, fontweight='bold')
+            axes[idx, 1].grid(True, alpha=0.3)
+            
+            axes[idx, 2].plot(K_slice, 'r-', linewidth=2)
+            axes[idx, 2].set_ylabel('K', fontsize=12, fontweight='bold')
+            axes[idx, 2].set_title(f't = {time_val:.3f} years', fontsize=11, fontweight='bold')
+            axes[idx, 2].grid(True, alpha=0.3)
+            
+            if idx == 3:
+                axes[idx, 0].set_xlabel('Sample Point', fontsize=11, fontweight='bold')
+                axes[idx, 1].set_xlabel('Sample Point', fontsize=11, fontweight='bold')
+                axes[idx, 2].set_xlabel('Sample Point', fontsize=11, fontweight='bold')
+        
+        axes[0, 0].set_title('Conformal Factor (φ)', fontsize=13, fontweight='bold', pad=15)
+        axes[0, 1].set_title('Lapse Function (α)', fontsize=13, fontweight='bold', pad=15)
+        axes[0, 2].set_title('Trace K', fontsize=13, fontweight='bold', pad=15)
+        
+        plt.suptitle('Spacetime Field Snapshots', fontsize=16, fontweight='bold', y=0.995)
+        plt.tight_layout()
+        plot_path = os.path.join(PROPER_BSSN_PLOTS_DIR, 'spacetime_snapshots.png')
+        plt.savefig(plot_path, dpi=150, bbox_inches='tight')
+        print(f"Spacetime snapshots plot saved to '{plot_path}'")
+        plt.close()
+    
+    def create_spacetime_animation(self, spacetime_history):
+        if not spacetime_history['times']:
+            print("No spacetime history data to create animation")
+            return
+        
+        print("\nCreating spacetime curvature animation...")
+        
+        times = spacetime_history['times']
+        phi_data = np.array(spacetime_history['phi_samples'])
+        alpha_data = np.array(spacetime_history['alpha_samples'])
+        K_data = np.array(spacetime_history['K_samples'])
+        
+        fig, axes = plt.subplots(1, 3, figsize=(18, 6))
+        
+        phi_min, phi_max = phi_data.min(), phi_data.max()
+        alpha_min, alpha_max = alpha_data.min(), alpha_data.max()
+        K_min, K_max = K_data.min(), K_data.max()
+        
+        def update(frame):
+            for ax in axes:
+                ax.clear()
+            
+            n_samples = min(50, int(np.sqrt(len(phi_data[frame]))))
+            phi_slice = phi_data[frame][:n_samples]
+            alpha_slice = alpha_data[frame][:n_samples]
+            K_slice = K_data[frame][:n_samples]
+            
+            axes[0].plot(phi_slice, 'b-', linewidth=2)
+            axes[0].set_ylim([phi_min, phi_max])
+            axes[0].set_xlabel('Sample Point', fontsize=11, fontweight='bold')
+            axes[0].set_ylabel('φ', fontsize=12, fontweight='bold')
+            axes[0].set_title('Conformal Factor', fontsize=12, fontweight='bold')
+            axes[0].grid(True, alpha=0.3)
+            
+            axes[1].plot(alpha_slice, 'g-', linewidth=2)
+            axes[1].set_ylim([alpha_min, alpha_max])
+            axes[1].set_xlabel('Sample Point', fontsize=11, fontweight='bold')
+            axes[1].set_ylabel('α', fontsize=12, fontweight='bold')
+            axes[1].set_title('Lapse Function', fontsize=12, fontweight='bold')
+            axes[1].grid(True, alpha=0.3)
+            
+            axes[2].plot(K_slice, 'r-', linewidth=2)
+            axes[2].set_ylim([K_min, K_max])
+            axes[2].set_xlabel('Sample Point', fontsize=11, fontweight='bold')
+            axes[2].set_ylabel('K', fontsize=12, fontweight='bold')
+            axes[2].set_title('Trace Extrinsic Curvature', fontsize=12, fontweight='bold')
+            axes[2].grid(True, alpha=0.3)
+            
+            fig.suptitle(f'Spacetime Curvature - t = {times[frame]:.3f} years',
+                        fontsize=14, fontweight='bold')
+        
+        anim = FuncAnimation(fig, update, frames=len(times),
+                           interval=200, blit=False, repeat=True)
+        
+        animation_path = os.path.join(PROPER_BSSN_PLOTS_DIR, 'spacetime_curvature_evolution.gif')
+        writer = PillowWriter(fps=5)
+        anim.save(animation_path, writer=writer, dpi=100)
+        print(f"Spacetime curvature animation saved to '{animation_path}'")
+        plt.close()
 
 def main_pn_solar_system():
     print("=" * 70)
@@ -2594,37 +2952,63 @@ def main_bssn_compact_binary():
         time_integrator='RK4'
     )
     
-    trajectories, times, constraints, amr_stats, gauge_data, diagnostics = sim.simulate()
+    trajectories, times, constraints, amr_stats, gauge_data, diagnostics, spacetime_history = sim.simulate()
     
     print("\n" + "=" * 70)
     print("POST-PROCESSING")
     print("=" * 70)
     
+    print("\nGenerating constraint violation plots...")
     sim.plot_constraint_violations(times, constraints)
     
     if sim.amr_enabled:
+        print("\nGenerating AMR statistics plots...")
         sim.plot_amr_statistics(amr_stats)
     
+    print("\nGenerating gauge evolution plots...")
     sim.plot_gauge_evolution(gauge_data)
     
     if sim.diagnostics_enabled:
+        print("\nGenerating conservation law plots...")
         sim.plot_conservation_laws(diagnostics)
+    
+    print("\nGenerating planetary trajectory plots...")
+    sim.plot_planetary_trajectories_3d(trajectories, times)
+    sim.plot_planetary_trajectories_2d(trajectories, times)
+    
+    print("\nGenerating spacetime curvature plots...")
+    sim.plot_spacetime_curvature_evolution(spacetime_history)
+    sim.plot_spacetime_snapshots(spacetime_history)
+    
+    print("\nGenerating animations (this may take a few minutes)...")
+    sim.create_solar_system_animation(trajectories, times)
+    sim.create_spacetime_animation(spacetime_history)
     
     print("\n" + "=" * 70)
     print("BSSN SIMULATION COMPLETE")
     print("=" * 70)
     print("\nGenerated files:")
-    print(f"  - {os.path.join(PROPER_BSSN_VTX_DIR, 'phi.bp')}")
-    print(f"  - {os.path.join(PROPER_BSSN_VTX_DIR, 'lapse.bp')}")
-    print(f"  - {os.path.join(PROPER_BSSN_VTX_DIR, 'trace_K.bp')}")
-    print(f"  - {os.path.join(PROPER_BSSN_VTX_DIR, 'shift.bp')}")
-    print(f"  - {os.path.join(PROPER_BSSN_VTX_DIR, 'shift_driver.bp')}")
-    print(f"  - {os.path.join(PROPER_BSSN_PLOTS_DIR, 'constraint_violations.png')}")
-    print(f"  - {os.path.join(PROPER_BSSN_PLOTS_DIR, 'gauge_evolution.png')}")
+    print("\n  VTX Data Files:")
+    print(f"    - {os.path.join(PROPER_BSSN_VTX_DIR, 'phi.bp')}")
+    print(f"    - {os.path.join(PROPER_BSSN_VTX_DIR, 'lapse.bp')}")
+    print(f"    - {os.path.join(PROPER_BSSN_VTX_DIR, 'trace_K.bp')}")
+    print(f"    - {os.path.join(PROPER_BSSN_VTX_DIR, 'shift.bp')}")
+    print(f"    - {os.path.join(PROPER_BSSN_VTX_DIR, 'shift_driver.bp')}")
+    print("\n  Diagnostic Plots:")
+    print(f"    - {os.path.join(PROPER_BSSN_PLOTS_DIR, 'constraint_violations.png')}")
+    print(f"    - {os.path.join(PROPER_BSSN_PLOTS_DIR, 'gauge_evolution.png')}")
     if sim.amr_enabled:
-        print(f"  - {os.path.join(PROPER_BSSN_PLOTS_DIR, 'amr_statistics.png')}")
+        print(f"    - {os.path.join(PROPER_BSSN_PLOTS_DIR, 'amr_statistics.png')}")
     if sim.diagnostics_enabled:
-        print(f"  - {os.path.join(PROPER_BSSN_PLOTS_DIR, 'conservation_laws.png')}")
+        print(f"    - {os.path.join(PROPER_BSSN_PLOTS_DIR, 'conservation_laws.png')}")
+    print("\n  Solar System Visualizations:")
+    print(f"    - {os.path.join(PROPER_BSSN_PLOTS_DIR, 'planetary_trajectories_3d.png')}")
+    print(f"    - {os.path.join(PROPER_BSSN_PLOTS_DIR, 'planetary_trajectories_2d.png')}")
+    print(f"    - {os.path.join(PROPER_BSSN_PLOTS_DIR, 'solar_system_evolution.gif')} (Animation)")
+    print("\n  Spacetime Curvature Visualizations:")
+    print(f"    - {os.path.join(PROPER_BSSN_PLOTS_DIR, 'spacetime_curvature_evolution.png')}")
+    print(f"    - {os.path.join(PROPER_BSSN_PLOTS_DIR, 'spacetime_snapshots.png')}")
+    print(f"    - {os.path.join(PROPER_BSSN_PLOTS_DIR, 'spacetime_curvature_evolution.gif')} (Animation)")
     
     print("\nKey features:")
     print("   Full BSSN formulation for strong-field evolution")
