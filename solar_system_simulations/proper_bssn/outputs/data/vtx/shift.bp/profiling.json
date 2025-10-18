@@ -1,3 +1,3 @@
 [
-{ "rank": 0, "start": "Sat_Oct_18_17:17:47_2025", "threads": 1, "bytes": 38390271, "mkdir_mus": 1903, "aggregation_mus": 0, "meta_sort_merge_mus": 2710, "minmax_mus": 6211, "memcpy_mus": 6067, "buffering_mus": 17427, "transport_0": { "type": "File_POSIX", "close_mus": 485, "write_mus": 252917, "open_mus": 3360}, "transport_1": { "type": "File_POSIX", "close_mus": 0, "write_mus": 11058, "open_mus": 3214} }
+{ "rank": 0, "start": "Sat_Oct_18_17:23:29_2025", "threads": 1, "bytes": 12263943, "mkdir_mus": 1853, "aggregation_mus": 0, "meta_sort_merge_mus": 1538, "minmax_mus": 2211, "memcpy_mus": 752, "buffering_mus": 6155, "transport_0": { "type": "File_POSIX", "close_mus": 2304, "write_mus": 89487, "open_mus": 6598}, "transport_1": { "type": "File_POSIX", "close_mus": 0, "write_mus": 6496, "open_mus": 2912} }
 ]

@@ -2607,9 +2607,9 @@ class CompactBinaryBSSN:
         plt.close()
     
     def create_solar_system_animation(self, trajectories, times):
-        print("\nCreating solar system animation...")
+        print("\nCreating high-quality solar system animation...")
         
-        fig = plt.figure(figsize=(12, 10))
+        fig = plt.figure(figsize=(16, 14))
         ax = fig.add_subplot(111, projection='3d')
         
         AU = self.solar_data.AU
@@ -2619,8 +2619,25 @@ class CompactBinaryBSSN:
             if len(positions) > 0:
                 traj_arrays[name] = np.array(positions) / AU
         
+        planet_sizes = {
+            'Sun': 800,
+            'Mercury': 180,
+            'Earth': 240,
+            'Jupiter': 350
+        }
+        
+        planet_markers = {
+            'Sun': '*',
+            'Mercury': 'o',
+            'Earth': 'o',
+            'Jupiter': 'o'
+        }
+        
         def update(frame):
             ax.clear()
+            
+            ax.set_facecolor('#000814')
+            fig.patch.set_facecolor('#001021')
             
             for name, positions in traj_arrays.items():
                 if frame >= len(positions):
@@ -2630,44 +2647,81 @@ class CompactBinaryBSSN:
                 
                 color = self.solar_data.bodies[name]['color']
                 
-                trail_start = max(0, frame_idx - 20)
-                ax.plot(positions[trail_start:frame_idx+1, 0],
-                       positions[trail_start:frame_idx+1, 1],
-                       positions[trail_start:frame_idx+1, 2],
-                       color=color, linewidth=1, alpha=0.5)
+                trail_length = 40 if name == 'Sun' else 50
+                trail_start = max(0, frame_idx - trail_length)
                 
-                size = 400 if name == 'Sun' else 200
-                marker = '*' if name == 'Sun' else 'o'
-                ax.scatter(positions[frame_idx, 0],
+                trail_alpha = np.linspace(0.15, 0.85, frame_idx - trail_start + 1)
+                
+                if frame_idx > trail_start:
+                    for i in range(trail_start, frame_idx):
+                        alpha_idx = i - trail_start
+                        ax.plot(positions[i:i+2, 0],
+                               positions[i:i+2, 1],
+                               positions[i:i+2, 2],
+                               color=color, 
+                               linewidth=2.5 if name != 'Sun' else 1.5,
+                               alpha=trail_alpha[alpha_idx],
+                               zorder=50)
+                
+                size = planet_sizes.get(name, 200)
+                marker = planet_markers.get(name, 'o')
+                
+                edge_color = 'orange' if name == 'Sun' else 'white'
+                edge_width = 3 if name == 'Sun' else 2.5
+                
+                scatter = ax.scatter(positions[frame_idx, 0],
                           positions[frame_idx, 1],
                           positions[frame_idx, 2],
                           color=color, s=size, marker=marker,
-                          edgecolors='black', linewidths=2, zorder=100)
+                          edgecolors=edge_color, linewidths=edge_width, 
+                          zorder=100, alpha=0.95)
+                
+                label_offset = 0.3
+                ax.text(positions[frame_idx, 0],
+                       positions[frame_idx, 1],
+                       positions[frame_idx, 2] + label_offset,
+                       name, fontsize=10, fontweight='bold',
+                       color='white', ha='center', zorder=101,
+                       bbox=dict(boxstyle='round,pad=0.3', 
+                                facecolor=color, alpha=0.7, edgecolor='white'))
             
-            ax.set_xlabel('X (AU)', fontsize=11, fontweight='bold')
-            ax.set_ylabel('Y (AU)', fontsize=11, fontweight='bold')
-            ax.set_zlabel('Z (AU)', fontsize=11, fontweight='bold')
+            ax.set_xlabel('X (AU)', fontsize=13, fontweight='bold', color='white')
+            ax.set_ylabel('Y (AU)', fontsize=13, fontweight='bold', color='white')
+            ax.set_zlabel('Z (AU)', fontsize=13, fontweight='bold', color='white')
+            
+            ax.tick_params(colors='white', labelsize=10)
+            
+            ax.xaxis.pane.fill = False
+            ax.yaxis.pane.fill = False
+            ax.zaxis.pane.fill = False
+            
+            ax.xaxis.pane.set_edgecolor('#1a1a2e')
+            ax.yaxis.pane.set_edgecolor('#1a1a2e')
+            ax.zaxis.pane.set_edgecolor('#1a1a2e')
+            
+            ax.grid(True, alpha=0.2, color='#4a4a6a', linestyle='--', linewidth=0.8)
             
             time_idx = min(frame, len(times) - 1)
-            ax.set_title(f'Solar System Evolution - t = {times[time_idx]:.3f} years',
-                        fontsize=13, fontweight='bold')
+            ax.set_title(f'Solar System Evolution - Time = {times[time_idx]:.3f} years',
+                        fontsize=15, fontweight='bold', color='white', pad=20)
             
             max_range = 6.0
             ax.set_xlim([-max_range, max_range])
             ax.set_ylim([-max_range, max_range])
             ax.set_zlim([-max_range, max_range])
-            ax.grid(True, alpha=0.3)
+            
+            ax.view_init(elev=25, azim=frame * 0.5)
         
-        num_frames = min(len(times), 100)
+        num_frames = min(len(times), 200)
         frame_indices = np.linspace(0, len(times) - 1, num_frames, dtype=int)
         
         anim = FuncAnimation(fig, update, frames=frame_indices, 
-                           interval=100, blit=False, repeat=True)
+                           interval=80, blit=False, repeat=True)
         
         animation_path = os.path.join(PROPER_BSSN_PLOTS_DIR, 'solar_system_evolution.gif')
-        writer = PillowWriter(fps=10)
-        anim.save(animation_path, writer=writer, dpi=100)
-        print(f"Solar system animation saved to '{animation_path}'")
+        writer = PillowWriter(fps=15)
+        anim.save(animation_path, writer=writer, dpi=120)
+        print(f"High-quality solar system animation saved to '{animation_path}'")
         plt.close()
     
     def plot_spacetime_curvature_evolution(self, spacetime_history):
